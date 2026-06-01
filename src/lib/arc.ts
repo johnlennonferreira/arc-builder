@@ -5,8 +5,8 @@ export const arcTestnet: Chain = {
   name: 'Arc Testnet',
   nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
   rpcUrls: {
-    default: { http: ['https://rpc-testnet.arc.io'] },
-    public: { http: ['https://rpc-testnet.arc.io'] },
+    default: { http: ['https://rpc.testnet.arc.network'] },
+    public: { http: ['https://rpc.testnet.arc.network'] },
   },
   blockExplorers: {
     default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' },
@@ -16,7 +16,7 @@ export const arcTestnet: Chain = {
 
 export const publicClient = createPublicClient({
   chain: arcTestnet,
-  transport: http(process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc-testnet.arc.io'),
+  transport: http(process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'),
 })
 
 export const IDENTITY_REGISTRY = '0x8004A818BFB912233c491871b3d84c89A494BD9e' as `0x${string}`
