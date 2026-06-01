@@ -171,18 +171,14 @@ export async function GET(request: Request) {
           blockNumber: (log.blockNumber ?? 0n).toString(),
           registeredAt,
           reputationScore,
-          txHash: log.transactionHash ?? '',
+          txHash: (log.transactionHash ?? '') as string,
         }
       })
     )
 
     const result = agents
-      .filter((r): r is PromiseFulfilledResult<{
-        id: string; owner: string; metadataURI: string
-        blockNumber: string; registeredAt: string
-        reputationScore: number; txHash: string
-      }> => r.status === 'fulfilled')
-      .map((r) => r.value)
+      .filter((r) => r.status === 'fulfilled')
+      .map((r) => (r as PromiseFulfilledResult<typeof r extends PromiseFulfilledResult<infer T> ? T : never>).value)
 
     return NextResponse.json(
       { agents: result, total, totalAgents },
