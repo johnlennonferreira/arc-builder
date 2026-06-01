@@ -16,6 +16,7 @@ const arcTestnet: Chain = {
 }
 
 const IDENTITY_REGISTRY = '0x8004A818BFB912233c491871b3d84c89A494BD9e' as `0x${string}`
+const REPUTATION_REGISTRY = '0x8004B663056A597Dffe9eCcC1965A193B7388713' as `0x${string}`
 
 const IDENTITY_ABI = [
   {
@@ -41,7 +42,56 @@ const IDENTITY_ABI = [
     inputs: [{ name: 'tokenId', type: 'uint256' }],
     outputs: [{ name: '', type: 'address' }],
   },
+  {
+    type: 'function',
+    name: 'totalSupply',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
 ] as const
+
+const REPUTATION_ABI = [
+  {
+    type: 'function',
+    name: 'getReputation',
+    stateMutability: 'view',
+    inputs: [{ name: 'agentId', type: 'uint256' }],
+    outputs: [{ name: '', type: 'int128' }],
+  },
+] as const
+
+const client = createPublicClient({
+  chain: arcTestnet,
+  transport: http('https://rpc.testnet.arc.network'),
+})
+
+async function getReputation(agentId: bigint): Promise<number> {
+  try {
+    const score = await client.readContract({
+      address: REPUTATION_REGISTRY,
+      abi: REPUTATION_ABI,
+      functionName: 'getReputation',
+      args: [agentId],
+    })
+    return Number(score)
+  } catch {
+    return 0
+  }
+}
+
+async function getTotalAgents(): Promise<number> {
+  try {
+    const total = await client.readContract({
+      address: IDENTITY_REGISTRY,
+      abi: IDENTITY_ABI,
+      functionName: 'totalSupply',
+    })
+    return Number(total)
+  } catch {
+    return 0
+  }
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -49,30 +99,27 @@ export async function GET(request: Request) {
   const pageSize = parseInt(searchParams.get('pageSize') ?? '20')
 
   try {
-    const client = createPublicClient({
-      chain: arcTestnet,
-      transport: http('https://rpc.testnet.arc.network'),
-    })
-
-    // Arc RPC limits getLogs to 9,999 blocks per query
     const latestBlock = await client.getBlockNumber()
     const fromBlock = latestBlock > 9999n ? latestBlock - 9999n : 0n
 
-    const logs = await client.getLogs({
-      address: IDENTITY_REGISTRY,
-      event: {
-        type: 'event',
-        name: 'Transfer',
-        inputs: [
-          { indexed: true, name: 'from', type: 'address' },
-          { indexed: true, name: 'to', type: 'address' },
-          { indexed: true, name: 'tokenId', type: 'uint256' },
-        ],
-      },
-      args: { from: '0x0000000000000000000000000000000000000000' },
-      fromBlock,
-      toBlock: latestBlock,
-    })
+    const [logs, totalAgents] = await Promise.all([
+      client.getLogs({
+        address: IDENTITY_REGISTRY,
+        event: {
+          type: 'event',
+          name: 'Transfer',
+          inputs: [
+            { indexed: true, name: 'from', type: 'address' },
+            { indexed: true, name: 'to', type: 'address' },
+            { indexed: true, name: 'tokenId', type: 'uint256' },
+          ],
+        },
+        args: { from: '0x0000000000000000000000000000000000000000' },
+        fromBlock,
+        toBlock: latestBlock,
+      }),
+      getTotalAgents(),
+    ])
 
     const total = logs.length
     const paginated = logs.slice(page * pageSize, (page + 1) * pageSize)
@@ -84,9 +131,20 @@ export async function GET(request: Request) {
 
         let metadataURI = ''
         let owner = to
+        let reputationScore = 0
+
+        // Get block for timestamp
+        let registeredAt = ''
+        try {
+          const block = await client.getBlock({ blockNumber: log.blockNumber ?? 0n })
+          const date = new Date(Number(block.timestamp) * 1000)
+          registeredAt = date.toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric'
+          })
+        } catch { /* keep empty */ }
 
         try {
-          const [uri, ownerAddr] = await Promise.all([
+          const [uri, ownerAddr, rep] = await Promise.all([
             client.readContract({
               address: IDENTITY_REGISTRY,
               abi: IDENTITY_ABI,
@@ -99,34 +157,42 @@ export async function GET(request: Request) {
               functionName: 'ownerOf',
               args: [tokenId],
             }),
+            getReputation(tokenId),
           ])
           metadataURI = uri as string
           owner = ownerAddr as string
-        } catch {
-          // keep defaults
-        }
+          reputationScore = rep
+        } catch { /* keep defaults */ }
 
         return {
           id: tokenId.toString(),
           owner,
           metadataURI,
           blockNumber: (log.blockNumber ?? 0n).toString(),
-          reputationScore: 0,
+          registeredAt,
+          reputationScore,
+          txHash: log.transactionHash ?? '',
         }
       })
     )
 
     const result = agents
       .filter((r): r is PromiseFulfilledResult<{
-        id: string; owner: string; metadataURI: string; blockNumber: string; reputationScore: number
+        id: string; owner: string; metadataURI: string
+        blockNumber: string; registeredAt: string
+        reputationScore: number; txHash: string
       }> => r.status === 'fulfilled')
       .map((r) => r.value)
 
-    return NextResponse.json({ agents: result, total }, {
-      headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=300' }
-    })
+    return NextResponse.json(
+      { agents: result, total, totalAgents },
+      { headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=60' } }
+    )
   } catch (err) {
     console.error('API error:', err)
-    return NextResponse.json({ agents: [], total: 0, error: 'Failed to fetch from Arc Testnet' }, { status: 500 })
+    return NextResponse.json(
+      { agents: [], total: 0, totalAgents: 0, error: 'Failed to fetch from Arc Testnet' },
+      { status: 500 }
+    )
   }
 }
