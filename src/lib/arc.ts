@@ -54,6 +54,7 @@ export interface Agent {
   owner: string
   metadataURI: string
   blockNumber: string
+  reputationScore: number
 }
 
 export async function fetchAgents(
@@ -116,6 +117,7 @@ export async function fetchAgents(
           owner,
           metadataURI,
           blockNumber: (log.blockNumber ?? 0n).toString(),
+          reputationScore: 0,
         } satisfies Agent
       })
     )
