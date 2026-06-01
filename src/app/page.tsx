@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { fetchAgents, type Agent } from '@/lib/arc'
+import type { Agent } from '@/lib/arc'
 
 function AgentCard({ agent }: { agent: Agent }) {
   const shortId = agent.id
@@ -84,7 +84,8 @@ export default function Home() {
   useEffect(() => {
     setLoading(true)
     setError(null)
-    fetchAgents(page, PAGE_SIZE)
+    fetch(`/api/agents?page=${page}&pageSize=${PAGE_SIZE}`)
+      .then((r) => r.json())
       .then(({ agents, total }) => {
         setAgents(agents)
         setTotal(total)
