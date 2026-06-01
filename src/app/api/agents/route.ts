@@ -54,6 +54,10 @@ export async function GET(request: Request) {
       transport: http('https://rpc.testnet.arc.network'),
     })
 
+    // Arc RPC limits getLogs to 9,999 blocks per query
+    const latestBlock = await client.getBlockNumber()
+    const fromBlock = latestBlock > 9999n ? latestBlock - 9999n : 0n
+
     const logs = await client.getLogs({
       address: IDENTITY_REGISTRY,
       event: {
@@ -66,8 +70,8 @@ export async function GET(request: Request) {
         ],
       },
       args: { from: '0x0000000000000000000000000000000000000000' },
-      fromBlock: 'earliest',
-      toBlock: 'latest',
+      fromBlock,
+      toBlock: latestBlock,
     })
 
     const total = logs.length
