@@ -1,5 +1,6 @@
-import { createPublicClient, http, type Chain } from 'viem'
+﻿import { createPublicClient, http, type Chain } from 'viem'
 import Link from 'next/link'
+import ShareButton from './ShareButton'
 
 const arcTestnet: Chain = {
   id: 5042002,
@@ -28,7 +29,15 @@ const REP_ABI = [
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  return { title: `Agent #${id} — Arc Agent Explorer`, description: `ERC-8004 agent identity on Arc Testnet` }
+  return {
+    title: `Agent #${id} — Arc Agent Explorer`,
+    description: `ERC-8004 agent identity on Arc Testnet. View reputation, metadata, and on-chain details.`,
+    openGraph: {
+      title: `Agent #${id} on Arc Testnet`,
+      description: `ERC-8004 registered agent. View on Arc Agent Explorer.`,
+      url: `https://arc-agent-explorer.vercel.app/agent/${id}`,
+    },
+  }
 }
 
 export default async function AgentPage({ params }: { params: Promise<{ id: string }> }) {
@@ -56,11 +65,11 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
 
   const isIPFS = metadataURI.startsWith('ipfs://')
   const scoreColor = reputation >= 80 ? '#00d4aa' : reputation >= 50 ? '#7aa4f9' : reputation > 0 ? '#f7a44f' : '#3a3a52'
+  const shareUrl = `https://arc-agent-explorer.vercel.app/agent/${id}`
 
   return (
     <main style={{ minHeight: '100vh', background: '#08080f', fontFamily: 'Inter, sans-serif' }}>
-      {/* Header */}
-      <header style={{ borderBottom: '1px solid #13131f', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '12px', position: 'sticky', top: 0, background: 'rgba(8,8,15,0.9)', backdropFilter: 'blur(16px)', zIndex: 40 }}>
+      <header style={{ borderBottom: '1px solid #13131f', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, position: 'sticky', top: 0, background: 'rgba(8,8,15,0.9)', backdropFilter: 'blur(16px)', zIndex: 40 }}>
         <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>A</div>
         <div>
           <p style={{ color: '#fff', fontWeight: 600, fontSize: 15, margin: 0, lineHeight: 1 }}>Arc Agent Explorer</p>
@@ -79,15 +88,16 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
           </div>
         ) : (
           <>
-            {/* Hero */}
-            <div style={{ marginBottom: 32 }}>
-              <p style={{ color: '#3a3a52', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Agent Identity</p>
-              <h1 style={{ background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: 48, fontWeight: 800, margin: 0, lineHeight: 1 }}>
-                #{id}
-              </h1>
+            <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <p style={{ color: '#3a3a52', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Agent Identity</p>
+                <h1 style={{ background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: 48, fontWeight: 800, margin: 0, lineHeight: 1 }}>
+                  #{id}
+                </h1>
+              </div>
+              <ShareButton url={shareUrl} agentId={id} />
             </div>
 
-            {/* Reputation */}
             <div style={{ background: 'linear-gradient(145deg,#111118,#0e0e16)', border: '1px solid #1a1a28', borderRadius: 14, padding: 20, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ width: 56, height: 56, borderRadius: '50%', border: `2px solid ${scoreColor}40`, background: `${scoreColor}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ color: scoreColor, fontSize: 20, fontWeight: 700 }}>{reputation > 0 ? reputation : '—'}</span>
@@ -100,17 +110,23 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
 
-            {/* Owner */}
             <div style={{ background: 'linear-gradient(145deg,#111118,#0e0e16)', border: '1px solid #1a1a28', borderRadius: 14, padding: 20, marginBottom: 16 }}>
               <p style={{ color: '#3a3a52', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>Owner Address</p>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                 <p style={{ fontFamily: 'JetBrains Mono, monospace', color: '#8a8a9e', fontSize: 13, margin: 0, wordBreak: 'break-all' }}>{owner}</p>
-                <a href={`${explorerBase}/address/${owner}`} target="_blank" rel="noopener noreferrer"
-                  style={{ color: '#00d4aa', fontSize: 12, textDecoration: 'none', flexShrink: 0 }}>View ↗</a>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <Link href={`/owner/${owner}`}
+                    style={{ color: '#5b8af7', fontSize: 12, textDecoration: 'none', padding: '2px 8px', border: '1px solid rgba(91,138,247,0.25)', borderRadius: 5 }}>
+                    Profile
+                  </Link>
+                  <a href={`${explorerBase}/address/${owner}`} target="_blank" rel="noopener noreferrer"
+                    style={{ color: '#00d4aa', fontSize: 12, textDecoration: 'none', padding: '2px 8px', border: '1px solid rgba(0,212,170,0.25)', borderRadius: 5 }}>
+                    ArcScan ↗
+                  </a>
+                </div>
               </div>
             </div>
 
-            {/* Metadata */}
             {metadataURI && (
               <div style={{ background: 'linear-gradient(145deg,#111118,#0e0e16)', border: '1px solid #1a1a28', borderRadius: 14, padding: 20, marginBottom: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -123,7 +139,6 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
 
-            {/* Actions */}
             <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
               <a href={`${explorerBase}/token/${IDENTITY}/instance/${id}`} target="_blank" rel="noopener noreferrer"
                 style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '12px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', color: '#fff', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
@@ -135,12 +150,9 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
               </Link>
             </div>
 
-            {/* Info box */}
-            <div style={{ marginTop: 24, padding: 16, borderRadius: 10, background: 'rgba(0,212,170,0.03)', border: '1px solid rgba(0,212,170,0.08)' }}>
+            <div style={{ marginTop: 20, padding: 16, borderRadius: 10, background: 'rgba(0,212,170,0.03)', border: '1px solid rgba(0,212,170,0.08)' }}>
               <p style={{ color: '#3a3a52', fontSize: 12, margin: 0, lineHeight: 1.6 }}>
-                This agent is registered on the Arc Testnet ERC-8004 IdentityRegistry at{' '}
-                <span style={{ fontFamily: 'monospace', color: '#2a2a3a' }}>{IDENTITY}</span>.
-                Share this page: <span style={{ color: '#00d4aa' }}>arc-agent-explorer.vercel.app/agent/{id}</span>
+                Share this agent: <span style={{ color: '#00d4aa', fontFamily: 'monospace' }}>{shareUrl}</span>
               </p>
             </div>
           </>
