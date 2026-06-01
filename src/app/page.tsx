@@ -144,12 +144,6 @@ function Skeleton() {
 
 // ── Filter bar ───────────────────────────────────────────────
 type Filter = 'all' | 'ipfs' | 'url' | 'reputed'
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'ipfs', label: 'IPFS' },
-  { key: 'url', label: 'URL' },
-  { key: 'reputed', label: 'Reputed' },
-]
 
 // ── Main ─────────────────────────────────────────────────────
 export default function Home() {
@@ -162,6 +156,7 @@ export default function Home() {
   const [filter, setFilter] = useState<Filter>('all')
   const [error, setError] = useState<string | null>(null)
   const [chart, setChart] = useState<ChartBar[]>([])
+  const [counts, setCounts] = useState({ ipfs: 0, url: 0, reputed: 0 })
 
   const PAGE_SIZE = 20
 
@@ -170,10 +165,11 @@ export default function Home() {
     setError(null)
     fetch(`/api/agents?page=${page}&pageSize=${PAGE_SIZE}&filter=${filter}`)
       .then(r => r.json())
-      .then(({ agents, total, totalAgents }) => {
+      .then(({ agents, total, totalAgents, counts }) => {
         setAgents(agents ?? [])
         setTotal(total ?? 0)
         setTotalAgents(totalAgents ?? 0)
+        if (counts) setCounts(counts)
       })
       .catch(() => setError('Failed to connect to Arc Testnet.'))
       .finally(() => setLoading(false))
@@ -258,17 +254,28 @@ export default function Home() {
             onFocus={e => (e.target.style.borderColor = '#2a2a45')}
             onBlur={e => (e.target.style.borderColor = '#1a1a28')}
           />
-          <div style={{ display: 'flex', gap: 6 }}>
-            {FILTERS.map(f => (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {([
+              { key: 'all' as Filter, label: 'All', count: total },
+              { key: 'ipfs' as Filter, label: 'IPFS', count: counts.ipfs },
+              { key: 'url' as Filter, label: 'URL', count: counts.url },
+              { key: 'reputed' as Filter, label: 'Reputed', count: counts.reputed },
+            ]).map(f => (
               <button key={f.key} onClick={() => { setFilter(f.key); setPage(0) }}
                 style={{
-                  padding: '8px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none',
+                  padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none',
                   background: filter === f.key ? 'linear-gradient(135deg,#00d4aa,#5b8af7)' : '#111118',
                   color: filter === f.key ? '#fff' : '#3a3a52',
                   outline: filter !== f.key ? '1px solid #1a1a28' : 'none',
                   transition: 'all 0.15s',
+                  display: 'flex', alignItems: 'center', gap: 6,
                 }}>
                 {f.label}
+                {!loading && f.count > 0 && (
+                  <span style={{ fontSize: 10, opacity: 0.7, background: filter === f.key ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', padding: '1px 5px', borderRadius: 4 }}>
+                    {f.count}
+                  </span>
+                )}
               </button>
             ))}
           </div>

@@ -27,58 +27,58 @@ export async function GET() {
   try {
     const latestBlock = await client.getBlockNumber()
     const WINDOW = 9999n
-    const NUM_WINDOWS = 5
 
+    // Fetch 5 windows
     const windows = await Promise.all(
-      Array.from({ length: NUM_WINDOWS }, (_, i) => {
+      Array.from({ length: 5 }, (_, i) => {
         const to = latestBlock - BigInt(i) * WINDOW
         const from = to > WINDOW ? to - WINDOW + 1n : 0n
-        return client.getLogs({
-          address: IDENTITY_REGISTRY,
-          event: TRANSFER_EVENT,
-          args: { from: '0x0000000000000000000000000000000000000000' },
-          fromBlock: from,
-          toBlock: to,
-        }).catch(() => [])
+        return client.getLogs({ address: IDENTITY_REGISTRY, event: TRANSFER_EVENT, args: { from: '0x0000000000000000000000000000000000000000' }, fromBlock: from, toBlock: to }).catch(() => [])
       })
     )
 
-    // Group by day
-    const dayMap: Record<string, number> = {}
-    const blockTimes: bigint[] = []
-
-    // Sample blocks to estimate timestamps (get 10 evenly spaced)
     const allLogs = windows.flat()
-    const sampleLogs = allLogs.filter((_, i) => i % Math.max(1, Math.floor(allLogs.length / 10)) === 0).slice(0, 10)
 
-    const blockDates = new Map<string, string>()
+    // Sample timestamps — pick one block per window to estimate hourly distribution
+    const windowBlocks = windows.map(w => w[Math.floor(w.length / 2)]?.blockNumber).filter(Boolean) as bigint[]
+    const blockTimestamps = new Map<bigint, number>()
+
     await Promise.all(
-      sampleLogs.map(async log => {
+      windowBlocks.map(async bn => {
         try {
-          const block = await client.getBlock({ blockNumber: log.blockNumber ?? 0n })
-          const day = new Date(Number(block.timestamp) * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-          blockDates.set((log.blockNumber ?? 0n).toString(), day)
-          blockTimes.push(log.blockNumber ?? 0n)
+          const block = await client.getBlock({ blockNumber: bn })
+          blockTimestamps.set(bn, Number(block.timestamp))
         } catch { /* ok */ }
       })
     )
 
-    // Estimate day for all logs using sampled block dates
+    // Build hourly map by estimating timestamp from nearest sampled block
+    // Arc ~2s block time
+    const AVG_BLOCK_TIME = 2 // seconds
+
+    const hourMap: Record<string, number> = {}
+
     for (const log of allLogs) {
       const bn = log.blockNumber ?? 0n
-      // Find closest sampled block
-      let closestDay = 'Unknown'
+      // Find nearest sampled block
+      let nearestTs: number | null = null
       let minDiff = BigInt(Number.MAX_SAFE_INTEGER)
-      for (const [sbn, day] of blockDates.entries()) {
-        const diff = bn > BigInt(sbn) ? bn - BigInt(sbn) : BigInt(sbn) - bn
-        if (diff < minDiff) { minDiff = diff; closestDay = day }
+      for (const [sbn, ts] of blockTimestamps.entries()) {
+        const diff = bn > sbn ? bn - sbn : sbn - bn
+        if (diff < minDiff) { minDiff = diff; nearestTs = ts }
       }
-      dayMap[closestDay] = (dayMap[closestDay] ?? 0) + 1
+      if (nearestTs === null) continue
+      // Estimate timestamp
+      const diff = Number(bn) - Array.from(blockTimestamps.keys()).find(k => blockTimestamps.get(k) === nearestTs)!.toString().split('').reduce((a, c) => a * 10 + +c, 0)
+      const estimatedTs = nearestTs + diff * AVG_BLOCK_TIME
+      const d = new Date(estimatedTs * 1000)
+      const hour = `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${d.getHours()}h`
+      hourMap[hour] = (hourMap[hour] ?? 0) + 1
     }
 
-    const chart = Object.entries(dayMap)
+    const chart = Object.entries(hourMap)
       .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(-24) // last 24 hours of data
 
     return NextResponse.json({ chart, total: allLogs.length }, {
       headers: { 'Cache-Control': 's-maxage=120, stale-while-revalidate=300' }
