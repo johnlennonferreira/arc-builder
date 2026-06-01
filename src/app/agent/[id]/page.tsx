@@ -1,4 +1,4 @@
-﻿import { createPublicClient, http, type Chain } from 'viem'
+import { createPublicClient, http, type Chain } from 'viem'
 import Link from 'next/link'
 import ShareButton from './ShareButton'
 

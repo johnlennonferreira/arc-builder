@@ -1,4 +1,4 @@
-﻿# Arc Agent Explorer
+# Arc Agent Explorer
 
 > Browse all registered ERC-8004 AI agents on the Arc Testnet — live from the IdentityRegistry smart contract.
 
