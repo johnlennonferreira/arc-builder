@@ -68,26 +68,49 @@ const client = createPublicClient({
 
 async function getReputation(agentId: bigint): Promise<number> {
   try {
-    const score = await client.readContract({
-      address: REPUTATION_REGISTRY,
-      abi: REPUTATION_ABI,
-      functionName: 'getReputation',
-      args: [agentId],
-    })
-    return Number(score)
+    const score = await Promise.race([
+      client.readContract({
+        address: REPUTATION_REGISTRY,
+        abi: REPUTATION_ABI,
+        functionName: 'getReputation',
+        args: [agentId],
+      }),
+      new Promise<null>((_, reject) => setTimeout(() => reject('timeout'), 3000))
+    ])
+    return score ? Number(score) : 0
   } catch {
     return 0
   }
 }
 
-async function getTotalAgents(): Promise<number> {
+async function getTotalFromLogs(latestBlock: bigint): Promise<number> {
+  // Get the very first mint events to find lowest tokenId
+  // and last events to find highest — estimate total from last tokenId
   try {
-    const total = await client.readContract({
+    const recentLogs = await client.getLogs({
       address: IDENTITY_REGISTRY,
-      abi: IDENTITY_ABI,
-      functionName: 'totalSupply',
+      event: {
+        type: 'event',
+        name: 'Transfer',
+        inputs: [
+          { indexed: true, name: 'from', type: 'address' },
+          { indexed: true, name: 'to', type: 'address' },
+          { indexed: true, name: 'tokenId', type: 'uint256' },
+        ],
+      },
+      args: { from: '0x0000000000000000000000000000000000000000' },
+      fromBlock: latestBlock - 9999n,
+      toBlock: latestBlock,
     })
-    return Number(total)
+    if (recentLogs.length > 0) {
+      // Get the max tokenId seen — that's approximately total registered
+      const maxId = recentLogs.reduce((max, log) => {
+        const id = log.args.tokenId ?? 0n
+        return id > max ? id : max
+      }, 0n)
+      return Number(maxId)
+    }
+    return 0
   } catch {
     return 0
   }
@@ -118,7 +141,7 @@ export async function GET(request: Request) {
         fromBlock,
         toBlock: latestBlock,
       }),
-      getTotalAgents(),
+      getTotalFromLogs(latestBlock),
     ])
 
     const total = logs.length

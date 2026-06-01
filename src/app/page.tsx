@@ -253,8 +253,8 @@ export default function Home() {
         <div className="grid grid-cols-3 gap-3 mb-8">
           <StatCard
             label="Total Agents"
-            value={loading ? '...' : totalAgents > 0 ? totalAgents.toLocaleString() : total.toString()}
-            sub={totalAgents > 0 ? 'on-chain' : 'recent window'}
+            value={loading ? '...' : totalAgents > 0 ? `${totalAgents.toLocaleString()}+` : total.toString()}
+            sub={totalAgents > 0 ? 'total registered' : 'recent window'}
           />
           <StatCard label="Network" value="Arc Testnet" sub="Chain ID 5042002" />
           <StatCard label="Standard" value="ERC-8004" sub="Agent Identity" />
