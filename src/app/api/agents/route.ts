@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createPublicClient, http, type Chain } from 'viem'
 
 const arcTestnet: Chain = {
@@ -80,12 +80,13 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get('page') ?? '0')
   const pageSize = parseInt(searchParams.get('pageSize') ?? '20')
   const filter = searchParams.get('filter') ?? 'all'
+  const sort = searchParams.get('sort') ?? 'newest'
+  const ownerFilter = searchParams.get('owner')?.toLowerCase() ?? null
 
   try {
     const latestBlock = await client.getBlockNumber()
     const fromBlock = latestBlock - BigInt(NUM_WINDOWS) * WINDOW
 
-    // Fetch all windows + reputation events in parallel
     const [windowResults, repMap] = await Promise.all([
       Promise.all(
         Array.from({ length: NUM_WINDOWS }, (_, i) => {
@@ -97,9 +98,8 @@ export async function GET(request: Request) {
       buildReputationMap(fromBlock > 0n ? fromBlock : 0n, latestBlock),
     ])
 
-    // Flatten + deduplicate by tokenId + sort descending
     const seen = new Set<string>()
-    const allLogs: AnyLog[] = windowResults
+    let allLogs: AnyLog[] = windowResults
       .flat()
       .filter((log: AnyLog) => {
         const id = (log.args?.tokenId ?? 0n).toString()
@@ -107,19 +107,38 @@ export async function GET(request: Request) {
         seen.add(id)
         return true
       })
-      .sort((a: AnyLog, b: AnyLog) => {
+
+    if (ownerFilter) {
+      allLogs = allLogs.filter((log: AnyLog) =>
+        (log.args?.to ?? '').toLowerCase() === ownerFilter
+      )
+    }
+
+    if (sort === 'oldest') {
+      allLogs.sort((a: AnyLog, b: AnyLog) => {
+        const ai = a.args?.tokenId ?? 0n
+        const bi = b.args?.tokenId ?? 0n
+        return ai > bi ? 1 : -1
+      })
+    } else if (sort === 'reputed') {
+      allLogs.sort((a: AnyLog, b: AnyLog) => {
+        const scoreA = repMap.get((a.args?.tokenId ?? 0n).toString()) ?? 0
+        const scoreB = repMap.get((b.args?.tokenId ?? 0n).toString()) ?? 0
+        return scoreB - scoreA
+      })
+    } else {
+      allLogs.sort((a: AnyLog, b: AnyLog) => {
         const ai = a.args?.tokenId ?? 0n
         const bi = b.args?.tokenId ?? 0n
         return bi > ai ? 1 : -1
       })
+    }
 
     const maxId = allLogs.length > 0
       ? Math.max(...allLogs.map((l: AnyLog) => Number(l.args?.tokenId ?? 0n)))
       : 0
 
     const total = allLogs.length
-
-    // Count filters for UI
     const countIPFS = allLogs.filter((l: AnyLog) => String(l._metadataURI ?? '').startsWith('ipfs://')).length
     const countURL = allLogs.filter((l: AnyLog) => String(l._metadataURI ?? '').startsWith('http')).length
     const countReputed = repMap.size
@@ -130,7 +149,6 @@ export async function GET(request: Request) {
       paginated.map(async (log: AnyLog) => {
         const tokenId = log.args?.tokenId ?? 0n
         const to = log.args?.to ?? '0x0000000000000000000000000000000000000000'
-
         let metadataURI = ''
         let owner = String(to)
         let registeredAt = ''
@@ -155,19 +173,20 @@ export async function GET(request: Request) {
       })
     )
 
-    let result = enriched.filter(r => r.status === 'fulfilled').map(r => (r as PromiseFulfilledResult<typeof r extends PromiseFulfilledResult<infer T> ? T : never>).value)
+    let result = enriched
+      .filter(r => r.status === 'fulfilled')
+      .map(r => (r as PromiseFulfilledResult<typeof r extends PromiseFulfilledResult<infer T> ? T : never>).value)
 
-    // Apply filters
     if (filter === 'ipfs') result = result.filter((a: { metadataURI: string }) => a.metadataURI.startsWith('ipfs://'))
     if (filter === 'url') result = result.filter((a: { metadataURI: string }) => a.metadataURI.startsWith('http'))
     if (filter === 'reputed') result = result.filter((a: { reputationScore: number }) => a.reputationScore > 0)
 
     return NextResponse.json(
-      { agents: result, total, totalAgents: maxId, counts: { ipfs: countIPFS, url: countURL, reputed: countReputed } },
+      { agents: result, total, totalAgents: maxId, latestBlock: latestBlock.toString(), counts: { ipfs: countIPFS, url: countURL, reputed: countReputed } },
       { headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=60' } }
     )
   } catch (err) {
     console.error('API error:', err)
-    return NextResponse.json({ agents: [], total: 0, totalAgents: 0, counts: { ipfs: 0, url: 0, reputed: 0 } }, { status: 500 })
+    return NextResponse.json({ agents: [], total: 0, totalAgents: 0, latestBlock: '0', counts: { ipfs: 0, url: 0, reputed: 0 } }, { status: 500 })
   }
 }

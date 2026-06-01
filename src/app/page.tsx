@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 
 interface Agent {
@@ -14,6 +14,8 @@ interface Agent {
 }
 
 interface ChartBar { date: string; count: number }
+type Filter = 'all' | 'ipfs' | 'url' | 'reputed'
+type Sort = 'newest' | 'oldest' | 'reputed'
 
 // ── Copy button ──────────────────────────────────────────────
 function CopyButton({ text }: { text: string }) {
@@ -79,6 +81,35 @@ function ScoreBadge({ score }: { score: number }) {
   )
 }
 
+// ── Live block counter ────────────────────────────────────────
+function LiveBlock({ block }: { block: string | null }) {
+  const [pulse, setPulse] = useState(false)
+  const prevBlock = useRef(block)
+
+  useEffect(() => {
+    if (block && block !== prevBlock.current) {
+      prevBlock.current = block
+      setPulse(true)
+      setTimeout(() => setPulse(false), 600)
+    }
+  }, [block])
+
+  if (!block || block === '0') return null
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{
+        width: 6, height: 6, borderRadius: '50%', background: '#00d4aa',
+        boxShadow: pulse ? '0 0 8px #00d4aa' : 'none',
+        transition: 'box-shadow 0.4s', flexShrink: 0,
+      }} />
+      <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#3a3a52', fontSize: 12 }}>
+        #{Number(block).toLocaleString()}
+      </span>
+    </div>
+  )
+}
+
 // ── Agent card ───────────────────────────────────────────────
 function AgentCard({ agent }: { agent: Agent }) {
   const short = `${agent.owner.slice(0, 6)}…${agent.owner.slice(-4)}`
@@ -102,7 +133,15 @@ function AgentCard({ agent }: { agent: Agent }) {
           <div>
             <p style={{ color: '#2a2a3a', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 3px', fontFamily: 'Inter, sans-serif' }}>Owner</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#6b6a7e', fontSize: 12 }}>{short}</span>
+              <Link
+                href={`/owner/${agent.owner}`}
+                onClick={e => e.stopPropagation()}
+                style={{ fontFamily: 'JetBrains Mono, monospace', color: '#5b8af7', fontSize: 12, textDecoration: 'none' }}
+                onMouseOver={e => (e.currentTarget.style.color = '#00d4aa')}
+                onMouseOut={e => (e.currentTarget.style.color = '#5b8af7')}
+              >
+                {short}
+              </Link>
               <CopyButton text={agent.owner} />
             </div>
           </div>
@@ -142,47 +181,73 @@ function Skeleton() {
   )
 }
 
-// ── Filter bar ───────────────────────────────────────────────
-type Filter = 'all' | 'ipfs' | 'url' | 'reputed'
-
 // ── Main ─────────────────────────────────────────────────────
 export default function Home() {
   const [agents, setAgents] = useState<Agent[]>([])
   const [total, setTotal] = useState(0)
   const [totalAgents, setTotalAgents] = useState(0)
+  const [latestBlock, setLatestBlock] = useState<string | null>(null)
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
+  const [sort, setSort] = useState<Sort>('newest')
   const [error, setError] = useState<string | null>(null)
   const [chart, setChart] = useState<ChartBar[]>([])
   const [counts, setCounts] = useState({ ipfs: 0, url: 0, reputed: 0 })
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const PAGE_SIZE = 20
+
+  // Keyboard shortcut: '/' focuses search, Escape blurs
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === '/' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+      if (e.key === 'Escape') searchRef.current?.blur()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   const load = useCallback(() => {
     setLoading(true)
     setError(null)
-    fetch(`/api/agents?page=${page}&pageSize=${PAGE_SIZE}&filter=${filter}`)
+    fetch(`/api/agents?page=${page}&pageSize=${PAGE_SIZE}&filter=${filter}&sort=${sort}`)
       .then(r => r.json())
-      .then(({ agents, total, totalAgents, counts }) => {
+      .then(({ agents, total, totalAgents, latestBlock: lb, counts }) => {
         setAgents(agents ?? [])
         setTotal(total ?? 0)
         setTotalAgents(totalAgents ?? 0)
+        if (lb) setLatestBlock(lb)
         if (counts) setCounts(counts)
       })
       .catch(() => setError('Failed to connect to Arc Testnet.'))
       .finally(() => setLoading(false))
-  }, [page, filter])
+  }, [page, filter, sort])
 
   useEffect(() => { load() }, [load])
+
+  // Live block polling every 10s
+  useEffect(() => {
+    const poll = () => {
+      fetch('/api/agents?page=0&pageSize=1')
+        .then(r => r.json())
+        .then(d => { if (d.latestBlock) setLatestBlock(d.latestBlock) })
+        .catch(() => {})
+    }
+    const t = setInterval(poll, 10000)
+    return () => clearInterval(t)
+  }, [])
 
   // Load chart once
   useEffect(() => {
     fetch('/api/stats')
       .then(r => r.json())
       .then(d => setChart(d.chart ?? []))
-      .catch(() => { })
+      .catch(() => {})
   }, [])
 
   const filtered = search
@@ -203,7 +268,8 @@ export default function Home() {
               <p style={{ color: '#3a3a52', fontSize: 11, margin: 0 }}>ERC-8004 Identity Registry</p>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <LiveBlock block={latestBlock} />
             <span className="tag tag-green">Testnet</span>
             <a href="https://docs.arc.io/arc/tutorials/register-your-first-ai-agent" target="_blank" rel="noopener noreferrer"
               className="btn btn-ghost" style={{ display: 'flex' }}>
@@ -228,9 +294,21 @@ export default function Home() {
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 24 }}>
           {[
-            { label: 'Total Agents', value: loading ? '…' : totalAgents > 0 ? `${totalAgents.toLocaleString()}+` : total.toString(), sub: totalAgents > 0 ? 'total registered' : 'recent window' },
-            { label: 'Network', value: 'Arc Testnet', sub: 'Chain ID 5042002' },
-            { label: 'Standard', value: 'ERC-8004', sub: 'Agent Identity' },
+            {
+              label: 'Total Agents',
+              value: loading ? '…' : totalAgents > 0 ? `${totalAgents.toLocaleString()}+` : total.toString(),
+              sub: totalAgents > 0 ? 'registered on testnet' : 'recent window',
+            },
+            {
+              label: 'Reputed Agents',
+              value: loading ? '…' : counts.reputed > 0 ? counts.reputed.toLocaleString() : '—',
+              sub: counts.reputed > 0 && total > 0 ? `${Math.round((counts.reputed / total) * 100)}% of window` : 'with on-chain feedback',
+            },
+            {
+              label: 'Latest Block',
+              value: latestBlock && latestBlock !== '0' ? `#${Number(latestBlock).toLocaleString()}` : '…',
+              sub: 'Arc Testnet · ~2s blocks',
+            },
           ].map(s => (
             <div key={s.label} className="card" style={{ padding: 16 }}>
               <p style={{ color: '#3a3a52', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>{s.label}</p>
@@ -243,17 +321,25 @@ export default function Home() {
         {/* Chart */}
         {chart.length > 0 && <MiniChart data={chart} />}
 
-        {/* Search + Filters */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            placeholder="Search by Agent ID or owner address…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{ flex: 1, minWidth: 200, padding: '10px 16px', borderRadius: 10, background: '#0e0e16', border: '1px solid #1a1a28', color: '#c9c7d4', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', outline: 'none' }}
-            onFocus={e => (e.target.style.borderColor = '#2a2a45')}
-            onBlur={e => (e.target.style.borderColor = '#1a1a28')}
-          />
+        {/* Search */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ position: 'relative' }}>
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder="Search by Agent ID or owner address…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ width: '100%', padding: '10px 40px 10px 16px', borderRadius: 10, background: '#0e0e16', border: '1px solid #1a1a28', color: '#c9c7d4', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', outline: 'none', boxSizing: 'border-box' }}
+              onFocus={e => (e.target.style.borderColor = '#2a2a45')}
+              onBlur={e => (e.target.style.borderColor = '#1a1a28')}
+            />
+            <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#2a2a3a', fontSize: 11, fontFamily: 'JetBrains Mono, monospace', pointerEvents: 'none', userSelect: 'none' }}>/</span>
+          </div>
+        </div>
+
+        {/* Filters + Sort */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {([
               { key: 'all' as Filter, label: 'All', count: total },
@@ -276,6 +362,26 @@ export default function Home() {
                     {f.count}
                   </span>
                 )}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <span style={{ color: '#2a2a3a', fontSize: 11 }}>Sort:</span>
+            {([
+              { key: 'newest' as Sort, label: '↓ Newest' },
+              { key: 'oldest' as Sort, label: '↑ Oldest' },
+              { key: 'reputed' as Sort, label: '⭐ Reputed' },
+            ]).map(s => (
+              <button key={s.key} onClick={() => { setSort(s.key); setPage(0) }}
+                style={{
+                  padding: '7px 11px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer', border: 'none',
+                  background: sort === s.key ? 'rgba(0,212,170,0.12)' : '#111118',
+                  color: sort === s.key ? '#00d4aa' : '#3a3a52',
+                  outline: sort !== s.key ? '1px solid #1a1a28' : '1px solid rgba(0,212,170,0.25)',
+                  transition: 'all 0.15s',
+                }}>
+                {s.label}
               </button>
             ))}
           </div>
