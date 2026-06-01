@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { fetchAgents, type Agent } from '@/lib/arc'
 
 function AgentCard({ agent }: { agent: Agent }) {
-  const shortId = agent.id.toString()
+  const shortId = agent.id
   const shortOwner = `${agent.owner.slice(0, 6)}...${agent.owner.slice(-4)}`
   const shortURI = agent.metadataURI.length > 40
     ? `${agent.metadataURI.slice(0, 40)}...`
@@ -177,7 +177,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map((agent) => (
-              <AgentCard key={agent.id.toString()} agent={agent} />
+              <AgentCard key={agent.id} agent={agent} />
             ))}
           </div>
         )}

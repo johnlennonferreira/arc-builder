@@ -1,4 +1,4 @@
-import { createPublicClient, http, parseAbiItem, type Chain } from 'viem'
+import { createPublicClient, http, type Chain } from 'viem'
 
 export const arcTestnet: Chain = {
   id: 5042002,
@@ -19,14 +19,11 @@ export const publicClient = createPublicClient({
   transport: http(process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc-testnet.arc.io'),
 })
 
-export const CONTRACTS = {
-  IDENTITY_REGISTRY: '0x8004A818BFB912233c491871b3d84c89A494BD9e' as `0x${string}`,
-  REPUTATION_REGISTRY: '0x8004B663056A597Dffe9eCcC1965A193B7388713' as `0x${string}`,
-  VALIDATION_REGISTRY: '0x8004Cb1BF31DAf7788923b405b754f57acEB4272' as `0x${string}`,
-  AGENTIC_COMMERCE: '0x0747EEf0706327138c69792bF28Cd525089e4583' as `0x${string}`,
-}
+export const IDENTITY_REGISTRY = '0x8004A818BFB912233c491871b3d84c89A494BD9e' as `0x${string}`
+export const REPUTATION_REGISTRY = '0x8004B663056A597Dffe9eCcC1965A193B7388713' as `0x${string}`
+export const AGENTIC_COMMERCE = '0x0747EEf0706327138c69792bF28Cd525089e4583' as `0x${string}`
 
-export const IDENTITY_REGISTRY_ABI = [
+const IDENTITY_ABI = [
   {
     type: 'event',
     name: 'Transfer',
@@ -41,46 +38,45 @@ export const IDENTITY_REGISTRY_ABI = [
     name: 'tokenURI',
     stateMutability: 'view',
     inputs: [{ name: 'tokenId', type: 'uint256' }],
-    outputs: [{ type: 'string' }],
+    outputs: [{ name: '', type: 'string' }],
   },
   {
     type: 'function',
     name: 'ownerOf',
     stateMutability: 'view',
     inputs: [{ name: 'tokenId', type: 'uint256' }],
-    outputs: [{ type: 'address' }],
-  },
-] as const
-
-export const REPUTATION_REGISTRY_ABI = [
-  {
-    type: 'event',
-    name: 'FeedbackGiven',
-    inputs: [
-      { indexed: true, name: 'agentId', type: 'uint256' },
-      { indexed: true, name: 'validator', type: 'address' },
-      { indexed: false, name: 'score', type: 'int128' },
-      { indexed: false, name: 'tag', type: 'string' },
-    ],
+    outputs: [{ name: '', type: 'address' }],
   },
 ] as const
 
 export interface Agent {
-  id: bigint
+  id: string
   owner: string
   metadataURI: string
-  reputationScore: number
-  registeredAt: bigint
+  blockNumber: string
 }
 
-export async function fetchAgents(page = 0, pageSize = 20): Promise<{ agents: Agent[], total: number }> {
+export async function fetchAgents(
+  page = 0,
+  pageSize = 20
+): Promise<{ agents: Agent[]; total: number }> {
   try {
     const logs = await publicClient.getLogs({
-      address: CONTRACTS.IDENTITY_REGISTRY,
-      event: parseAbiItem('event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)'),
-      fromBlock: 0n,
+      address: IDENTITY_REGISTRY,
+      event: {
+        type: 'event',
+        name: 'Transfer',
+        inputs: [
+          { indexed: true, name: 'from', type: 'address' },
+          { indexed: true, name: 'to', type: 'address' },
+          { indexed: true, name: 'tokenId', type: 'uint256' },
+        ],
+      },
+      args: {
+        from: '0x0000000000000000000000000000000000000000',
+      },
+      fromBlock: 'earliest',
       toBlock: 'latest',
-      args: { from: '0x0000000000000000000000000000000000000000' },
     })
 
     const total = logs.length
@@ -88,49 +84,52 @@ export async function fetchAgents(page = 0, pageSize = 20): Promise<{ agents: Ag
 
     const agents = await Promise.allSettled(
       paginated.map(async (log) => {
-        const tokenId = log.args.tokenId!
+        const tokenId = log.args.tokenId ?? 0n
+        const to = log.args.to ?? '0x0000000000000000000000000000000000000000'
+
+        let metadataURI = 'ipfs://unknown'
+        let owner = to as string
+
         try {
-          const [metadataURI, owner] = await Promise.all([
+          const [uri, ownerAddr] = await Promise.all([
             publicClient.readContract({
-              address: CONTRACTS.IDENTITY_REGISTRY,
-              abi: IDENTITY_REGISTRY_ABI,
+              address: IDENTITY_REGISTRY,
+              abi: IDENTITY_ABI,
               functionName: 'tokenURI',
               args: [tokenId],
             }),
             publicClient.readContract({
-              address: CONTRACTS.IDENTITY_REGISTRY,
-              abi: IDENTITY_REGISTRY_ABI,
+              address: IDENTITY_REGISTRY,
+              abi: IDENTITY_ABI,
               functionName: 'ownerOf',
               args: [tokenId],
             }),
           ])
-          return {
-            id: tokenId,
-            owner: owner as string,
-            metadataURI: metadataURI as string,
-            reputationScore: Math.floor(Math.random() * 40) + 60,
-            registeredAt: log.blockNumber ?? 0n,
-          }
+          metadataURI = uri as string
+          owner = ownerAddr as string
         } catch {
-          return {
-            id: tokenId,
-            owner: log.args.to ?? '0x0000000000000000000000000000000000000000',
-            metadataURI: 'ipfs://unknown',
-            reputationScore: 0,
-            registeredAt: log.blockNumber ?? 0n,
-          }
+          // keep defaults
         }
+
+        return {
+          id: tokenId.toString(),
+          owner,
+          metadataURI,
+          blockNumber: (log.blockNumber ?? 0n).toString(),
+        } satisfies Agent
       })
     )
 
     return {
       agents: agents
-        .filter((r): r is PromiseFulfilledResult<Agent> => r.status === 'fulfilled')
+        .filter(
+          (r): r is PromiseFulfilledResult<Agent> => r.status === 'fulfilled'
+        )
         .map((r) => r.value),
       total,
     }
-  } catch (error) {
-    console.error('Failed to fetch agents:', error)
+  } catch (err) {
+    console.error('fetchAgents error:', err)
     return { agents: [], total: 0 }
   }
 }
