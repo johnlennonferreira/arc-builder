@@ -21,6 +21,7 @@ export default function ActivityPage() {
   const [events,      setEvents]      = useState<Event[]>([])
   const [latestBlock, setLatestBlock] = useState('')
   const [loading,     setLoading]     = useState(true)
+  const [error,       setError]       = useState(false)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [newCount,    setNewCount]    = useState(0)
   const prevTopRef = useRef<string>('')
@@ -40,7 +41,7 @@ export default function ActivityPage() {
       })
       setLatestBlock(d.latestBlock ?? '')
       setLastRefresh(new Date())
-    } catch { /* ignore */ }
+    } catch { setError(true) }
     finally { setLoading(false) }
   }
 
@@ -73,7 +74,7 @@ export default function ActivityPage() {
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00d4aa', boxShadow: '0 0 8px #00d4aa', animation: 'pulse 2s infinite' }} />
+            <div className="pulse" style={{ width: 8, height: 8, borderRadius: '50%', background: '#00d4aa', color: '#00d4aa' }} />
             <span style={{ color: '#00d4aa', fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Live · Arc Testnet</span>
             {newCount > 0 && (
               <span style={{ background: '#00d4aa', color: '#000', fontSize: 10, fontWeight: 800, padding: '1px 7px', borderRadius: 20 }}>+{newCount} new</span>
@@ -102,11 +103,17 @@ export default function ActivityPage() {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '80px 0', color: '#555' }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>⟳</div>
-            Scanning latest blocks…
+            <div className="skeleton" style={{ width: '100%', height: 60, marginBottom: 8 }} />
+            <div className="skeleton" style={{ width: '100%', height: 60, marginBottom: 8 }} />
+            <div className="skeleton" style={{ width: '100%', height: 60 }} />
+          </div>
+        ) : error ? (
+          <div style={{ textAlign: 'center', padding: '80px 0', color: '#f44336' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
+            Failed to load events. <button onClick={fetchActivity} style={{ color: '#5b8af7', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>Retry</button>
           </div>
         ) : events.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#555' }}>No recent events found.</div>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: '#555' }}>No recent events found in the last 2000 blocks.</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {blocks.map(block => (

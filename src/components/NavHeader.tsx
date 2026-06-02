@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { createPublicClient, http, parseAbi } from 'viem'
+import { parseAbi } from 'viem'
+import { publicClient, USDC_ADDRESS } from '@/lib/arc'
 import { useWallet } from '@/components/WalletProvider'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -23,10 +24,8 @@ export default function NavHeader({ right }: { right?: React.ReactNode }) {
 
   useEffect(() => {
     if (!account) { setBalance(''); return }
-    const USDC = '0x3600000000000000000000000000000000000000' as `0x${string}`
-    const pub = createPublicClient({ chain: { id: 5042002, name: 'Arc Testnet', nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 6 }, rpcUrls: { default: { http: ['https://rpc.testnet.arc.network'] } } } as Parameters<typeof createPublicClient>[0]['chain'], transport: http('https://rpc.testnet.arc.network') })
     const abi = parseAbi(['function balanceOf(address) view returns (uint256)'])
-    pub.readContract({ address: USDC, abi, functionName: 'balanceOf', args: [account as `0x${string}`] })
+    publicClient.readContract({ address: USDC_ADDRESS, abi, functionName: 'balanceOf', args: [account as `0x${string}`] })
       .then((bal) => setBalance((Number(bal) / 1e6).toFixed(2)))
       .catch(() => setBalance(''))
   }, [account])

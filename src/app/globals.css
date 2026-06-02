@@ -105,6 +105,12 @@ body {
   .score-zero { color: #3a3a52; }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px currentColor; }
+  50%       { opacity: 0.4; box-shadow: 0 0 2px currentColor; }
+}
+.pulse { animation: pulse 2s ease-in-out infinite; }
+
 /* Hide nav scrollbar on mobile */
 nav::-webkit-scrollbar { display: none; }
 

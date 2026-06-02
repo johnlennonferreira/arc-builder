@@ -61,14 +61,18 @@ export default function LeaderboardPage() {
   const [builders,  setBuilders]  = useState<Builder[]>([])
   const [stats,     setStats]     = useState<Stats | null>(null)
   const [loading,   setLoading]   = useState(true)
+  const [error,     setError]     = useState(false)
 
-  useEffect(() => {
+  function load() {
+    setLoading(true); setError(false)
     fetch('/api/leaderboard')
       .then(r => r.json())
       .then(d => { setProviders(d.providers ?? []); setClients(d.clients ?? []); setBuilders(d.builders ?? []); setStats(d.stats ?? null) })
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a14', color: '#e8e8f0', fontFamily: "'Inter', sans-serif" }}>
@@ -81,7 +85,12 @@ export default function LeaderboardPage() {
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#f7a35b', boxShadow: '0 0 8px #f7a35b' }} />
             <span style={{ color: '#f7a35b', fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Arc Testnet · ERC-8004 + ERC-8183</span>
           </div>
-          <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 8px', letterSpacing: '-0.03em' }}>Leaderboard</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 8px', letterSpacing: '-0.03em' }}>Leaderboard</h1>
+            {!loading && (
+              <button onClick={load} title="Refresh" style={{ background: 'transparent', border: '1px solid #2a2a3a', borderRadius: 8, padding: '4px 10px', color: '#555', cursor: 'pointer', fontSize: 14, marginBottom: 8 }}>↻</button>
+            )}
+          </div>
           <p style={{ color: '#555', fontSize: 14, margin: 0 }}>Top builders, providers, and clients on Arc Testnet by on-chain activity.</p>
         </div>
 
@@ -103,9 +112,14 @@ export default function LeaderboardPage() {
         )}
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#555' }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>⟳</div>
-            Loading on-chain data…
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+            {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 300, borderRadius: 16 }} />)}
+          </div>
+        ) : error ? (
+          <div style={{ textAlign: 'center', padding: '80px 0', color: '#f44336' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
+            Failed to load leaderboard.{' '}
+            <button onClick={load} style={{ color: '#5b8af7', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>Retry</button>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>

@@ -5,15 +5,9 @@ import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi, keccak256, toBytes } from 'viem'
 import { ensureArcTestnet } from '@/lib/switchChain'
+import { arcTestnet, ARC_RPC_URL } from '@/lib/arc'
 import { useWallet } from '@/components/WalletProvider'
 import { useToast } from '@/components/Toast'
-
-const ARC = {
-  id: 5042002, name: 'Arc Testnet',
-  nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
-  rpcUrls: { default: { http: ['https://rpc.testnet.arc.network'] } },
-  blockExplorers: { default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' } },
-} as const
 
 const COMMERCE = '0x0747EEf0706327138c69792bF28Cd525089e4583' as `0x${string}`
 
@@ -107,8 +101,8 @@ export default function JobsPage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const eth = (window as any).ethereum
       await ensureArcTestnet()
-      const wallet = createWalletClient({ account: account as `0x${string}`, chain: ARC, transport: custom(eth) })
-      const pub    = createPublicClient({ chain: ARC, transport: http('https://rpc.testnet.arc.network') })
+      const wallet = createWalletClient({ account: account as `0x${string}`, chain: arcTestnet, transport: custom(eth) })
+      const pub    = createPublicClient({ chain: arcTestnet, transport: http(ARC_RPC_URL) })
       const hash32 = keccak256(toBytes(deliverable.trim()))
       const h = await wallet.writeContract({ address: COMMERCE, abi: COMMERCE_ABI, functionName: 'submit', args: [BigInt(job.id), hash32, '0x'] })
       setTxHash(h); setTxStep('confirming')
@@ -129,8 +123,8 @@ export default function JobsPage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const eth = (window as any).ethereum
       await ensureArcTestnet()
-      const wallet = createWalletClient({ account: account as `0x${string}`, chain: ARC, transport: custom(eth) })
-      const pub    = createPublicClient({ chain: ARC, transport: http('https://rpc.testnet.arc.network') })
+      const wallet = createWalletClient({ account: account as `0x${string}`, chain: arcTestnet, transport: custom(eth) })
+      const pub    = createPublicClient({ chain: arcTestnet, transport: http(ARC_RPC_URL) })
       const ZERO32 = '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`
       const h = await wallet.writeContract({ address: COMMERCE, abi: COMMERCE_ABI, functionName: 'complete', args: [BigInt(job.id), ZERO32, '0x'] })
       setTxHash(h); setTxStep('confirming')

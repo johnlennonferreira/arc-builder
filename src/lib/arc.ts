@@ -1,5 +1,8 @@
 import { createPublicClient, http, type Chain } from 'viem'
 
+export const ARC_RPC_URL   = 'https://rpc.testnet.arc.network'
+export const USDC_ADDRESS  = '0x3600000000000000000000000000000000000000' as `0x${string}`
+
 export const arcTestnet: Chain = {
   id: 5042002,
   name: 'Arc Testnet',

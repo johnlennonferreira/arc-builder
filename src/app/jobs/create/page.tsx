@@ -5,19 +5,11 @@ import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi } from 'viem'
 import { ensureArcTestnet } from '@/lib/switchChain'
+import { arcTestnet, ARC_RPC_URL, USDC_ADDRESS } from '@/lib/arc'
 import { useWallet } from '@/components/WalletProvider'
 import { useToast } from '@/components/Toast'
 
-const ARC_TESTNET = {
-  id: 5042002,
-  name: 'Arc Testnet',
-  nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
-  rpcUrls: { default: { http: ['https://rpc.testnet.arc.network'] } },
-  blockExplorers: { default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' } },
-} as const
-
 const AGENTIC_COMMERCE = '0x0747EEf0706327138c69792bF28Cd525089e4583' as `0x${string}`
-const USDC             = '0x3600000000000000000000000000000000000000' as `0x${string}`
 
 const COMMERCE_ABI = parseAbi([
   'function createJob(address provider, address evaluator, uint256 expiredAt, string description, address hook) external returns (uint256)',
@@ -77,8 +69,8 @@ export default function CreateJobPage() {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const eth = (window as any).ethereum
-    const wallet = createWalletClient({ account: account as `0x${string}`, chain: ARC_TESTNET, transport: custom(eth) })
-    const pub    = createPublicClient({ chain: ARC_TESTNET, transport: http('https://rpc.testnet.arc.network') })
+    const wallet = createWalletClient({ account: account as `0x${string}`, chain: arcTestnet, transport: custom(eth) })
+    const pub    = createPublicClient({ chain: arcTestnet, transport: http(ARC_RPC_URL) })
 
     const budgetMicro = BigInt(Math.round(parseFloat(budget) * 1_000_000))
     const expiredAt   = BigInt(Math.floor(Date.now() / 1000) + parseInt(days) * 86400)
@@ -118,7 +110,7 @@ export default function CreateJobPage() {
       // Step 3: approve USDC + fund
       setStep('tx3')
       const h3 = await wallet.writeContract({
-        address: USDC, abi: USDC_ABI, functionName: 'approve',
+        address: USDC_ADDRESS, abi: USDC_ABI, functionName: 'approve',
         args: [AGENTIC_COMMERCE, budgetMicro],
       })
       await pub.waitForTransactionReceipt({ hash: h3 })
