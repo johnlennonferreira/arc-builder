@@ -1,49 +1,47 @@
 # Arc Agent Explorer
 
-> Browse all registered ERC-8004 AI agents on the Arc Testnet — live from the IdentityRegistry smart contract.
+[![Deploy](https://img.shields.io/badge/Vercel-Live-00d4aa?style=flat&logo=vercel)](https://arc-agent-explorer.vercel.app)
+[![Network](https://img.shields.io/badge/Arc-Testnet-5b8af7?style=flat)](https://arc.io)
+[![Standard](https://img.shields.io/badge/ERC-8004-00d4aa?style=flat)](https://docs.arc.io)
+[![License](https://img.shields.io/badge/License-MIT-gray?style=flat)](LICENSE)
 
-**Live:** https://arc-agent-explorer.vercel.app
+> Open-source explorer for ERC-8004 AI agents on the Arc Testnet — live data from the IdentityRegistry smart contract.
+
+**🌐 Live:** https://arc-agent-explorer.vercel.app
 
 ---
 
-## What it does
+## What is this?
 
-Arc Agent Explorer is an open-source explorer for the [Arc Testnet](https://arc.io) ERC-8004 IdentityRegistry. It lets you:
+Arc is Circle's L1 blockchain with native USDC gas and a unique standard for AI agent identity: **ERC-8004**. Every AI agent registered on Arc gets an on-chain identity with reputation, metadata, and provable history.
 
-- Browse 32,000+ registered AI agent identities in real time
-- See reputation scores from the ReputationRegistry
-- Filter by metadata type (IPFS, URL) or reputation
-- Sort by newest, oldest, or most reputed
-- Click any owner address to see their full agent portfolio
-- Get test USDC from the faucet and register your own agent
-
-Built to make the Arc agent identity layer visible and accessible to builders.
+Arc Agent Explorer makes this registry visible and accessible — browse 32,000+ registered agents, see their reputation scores, explore owner portfolios, and track new registrations in real time.
 
 ---
 
 ## Features
 
-| Feature | Details |
-|---|---|
-| **Live registry data** | Reads directly from IdentityRegistry contract via RPC |
-| **Reputation scores** | Aggregated from FeedbackGiven events on ReputationRegistry |
-| **Owner profiles** | `/owner/[address]` — all agents per wallet |
-| **Agent detail pages** | `/agent/[id]` — metadata, owner, reputation, ArcScan link |
-| **Sort & filter** | Newest / Oldest / Most Reputed · IPFS / URL / Reputed |
-| **Live block counter** | Real-time block number in header, updates every 10s |
-| **Animated stats** | Total agent count animates on load |
-| **Recent registrations** | Live ticker of 5 latest registered agents |
-| **Keyboard shortcut** | Press `/` to focus search from anywhere |
-| **Share button** | Copy direct link to any agent page |
-| **Faucet link** | One click to get test USDC from faucet.circle.com |
+| | Feature | Description |
+|---|---|---|
+| 🔍 | **Live registry** | Reads directly from IdentityRegistry via RPC — no API key needed |
+| ⭐ | **Reputation scores** | Aggregated from FeedbackGiven events on ReputationRegistry |
+| 👤 | **Owner profiles** | `/owner/[address]` — all agents per wallet with stats |
+| 📄 | **Agent detail pages** | `/agent/[id]` — metadata, owner, reputation, ArcScan link |
+| ↕️ | **Sort & filter** | Newest / Oldest / Most Reputed · IPFS / URL / Reputed |
+| 📡 | **Live block counter** | Header shows current block, updates every 10s |
+| 🔢 | **Animated stats** | Total agent count animates on load |
+| ⚡ | **Recent ticker** | Live strip of the 5 latest registered agents |
+| ⌨️ | **Keyboard shortcut** | Press `/` to focus search from anywhere |
+| 🔗 | **Share button** | Copy direct link to any agent page |
+| 💧 | **Faucet link** | One click → get test USDC from faucet.circle.com |
 
 ---
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router)
+- **Framework:** Next.js 15 (App Router, TypeScript)
 - **Blockchain:** [viem](https://viem.sh) — reads Arc Testnet via RPC
-- **Deploy:** Vercel (auto-deploy on push)
+- **Deploy:** Vercel (auto-deploy on push to main)
 - **Network:** Arc Testnet (Chain ID: 5042002)
 - **Standards:** ERC-8004 (agent identity), ERC-8183 (agent commerce)
 
@@ -60,7 +58,7 @@ Built to make the Arc agent identity layer visible and accessible to builders.
 
 ---
 
-## Getting Started
+## Run Locally
 
 ```bash
 git clone https://github.com/johnlennonferreira/arc-builder
@@ -71,27 +69,37 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-No env vars needed — reads directly from the public Arc Testnet RPC.
+**No environment variables required** — reads directly from the public Arc Testnet RPC.
 
 ---
 
-## Register Your Agent
+## New to Arc?
 
-New to Arc? Get test USDC and register your first ERC-8004 agent:
+1. [💧 Get Test USDC](https://faucet.circle.com) — free testnet funds from Circle
+2. [📝 Register Your Agent](https://docs.arc.io/arc/tutorials/register-your-first-ai-agent) — step-by-step tutorial
+3. [🔍 Browse Agents](https://arc-agent-explorer.vercel.app) — explore what's already registered
 
-1. [Get Test USDC](https://faucet.circle.com) — free from the Circle faucet
-2. [Register Agent](https://docs.arc.io/arc/tutorials/register-your-first-ai-agent) — Arc docs tutorial
+---
+
+## Roadmap
+
+- [ ] ERC-8183 Jobs section — live job listings from AgenticCommerce
+- [ ] Goldsky subgraph integration — faster indexing, full history
+- [ ] x402 nanopayments for premium API access
 
 ---
 
 ## Links
 
-- **Explorer:** https://arc-agent-explorer.vercel.app
-- **Arc Testnet:** https://arc.io
-- **ArcScan:** https://testnet.arcscan.app
-- **Arc Docs:** https://docs.arc.io
-- **Faucet:** https://faucet.circle.com
+| | |
+|---|---|
+| 🌐 Explorer | https://arc-agent-explorer.vercel.app |
+| 📦 GitHub | https://github.com/johnlennonferreira/arc-builder |
+| 🔍 ArcScan | https://testnet.arcscan.app |
+| 📚 Arc Docs | https://docs.arc.io |
+| 💧 Faucet | https://faucet.circle.com |
+| 🏠 Arc House | https://community.arc.io |
 
 ---
 
-Built on Arc Testnet · Open source · MIT
+Built on Arc Testnet · Open source · MIT License
