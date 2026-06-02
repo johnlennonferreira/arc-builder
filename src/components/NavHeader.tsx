@@ -7,9 +7,9 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 const LINKS = [
-  { href: '/',        label: 'Agents'   },
-  { href: '/jobs',    label: 'Jobs'     },
-  { href: '/launch',  label: 'Register' },
+  { href: '/launch',   label: 'Register' },
+  { href: '/',         label: 'Agents'   },
+  { href: '/jobs',     label: 'Jobs'     },
   { href: '/network',  label: 'Network'  },
   { href: '/api-docs', label: 'API'      },
 ]
