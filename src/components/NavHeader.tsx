@@ -47,9 +47,47 @@ export default function NavHeader({ right }: { right?: React.ReactNode }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {right}
           <span style={{ background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.25)', borderRadius: 20, padding: '2px 8px', color: '#00d4aa', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>Testnet</span>
-          <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer" style={{ padding: '5px 10px', borderRadius: 8, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', color: '#00d4aa', fontSize: 11, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            USDC
-          </a>
+
+          {account ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 0, borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(0,212,170,0.25)', background: 'rgba(0,212,170,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px' }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#00d4aa', boxShadow: '0 0 4px #00d4aa', flexShrink: 0 }} />
+                <span style={{ color: '#00d4aa', fontSize: 11, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>
+                  {account.slice(0,6)}...{account.slice(-4)}
+                </span>
+                {balance && (
+                  <span style={{ color: '#3a5a50', fontSize: 10, whiteSpace: 'nowrap' }}>{balance} USDC</span>
+                )}
+              </div>
+              <button
+                onClick={disconnect}
+                title="Disconnect wallet"
+                style={{
+                  padding: '4px 10px', background: 'rgba(244,67,54,0.1)', border: 'none',
+                  borderLeft: '1px solid rgba(0,212,170,0.15)', color: '#f44336',
+                  fontSize: 13, cursor: 'pointer', fontWeight: 700, lineHeight: 1,
+                  height: '100%',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244,67,54,0.25)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(244,67,54,0.1)' }}
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={connect}
+              disabled={connecting}
+              style={{
+                padding: '5px 14px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                cursor: connecting ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
+                background: 'rgba(91,138,247,0.1)', border: '1px solid rgba(91,138,247,0.3)',
+                color: '#5b8af7',
+              }}
+            >
+              {connecting ? 'Connecting...' : 'Connect Wallet'}
+            </button>
+          )}
         </div>
       </div>
       {/* Nav tabs row — scrollable on mobile */}
