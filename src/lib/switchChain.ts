@@ -1,39 +1,42 @@
+const ARC_CHAIN_ID = '0x4cef52'
+
 export async function ensureArcTestnet(): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const eth = (window as any).ethereum
-  if (!eth) throw new Error('No wallet found. Please install MetaMask.')
+  if (!eth) throw new Error('No wallet found. Please install MetaMask or Rabby.')
 
-  // Check current chain
   const currentChain = await eth.request({ method: 'eth_chainId' }) as string
-  if (currentChain === '0x4CEF52') return // already on Arc Testnet
+  if (currentChain.toLowerCase() === ARC_CHAIN_ID) return
 
-  // Request switch
   try {
-    await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CEF52' }] })
+    await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ARC_CHAIN_ID }] })
   } catch (e: unknown) {
     const err = e as { code?: number }
     if (err.code === 4902 || err.code === -32603) {
-      // Chain not added — add it
       await eth.request({
         method: 'wallet_addEthereumChain',
         params: [{
-          chainId: '0x4CEF52',
+          chainId: ARC_CHAIN_ID,
           chainName: 'Arc Testnet',
           nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
           rpcUrls: ['https://rpc.testnet.arc.network'],
           blockExplorerUrls: ['https://testnet.arcscan.app'],
         }],
       })
+      // After adding, explicitly switch to it
+      try {
+        await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ARC_CHAIN_ID }] })
+      } catch { /* ignore */ }
     } else {
       throw e
     }
   }
 
-  // Wait until chain is actually switched (up to 5s)
-  for (let i = 0; i < 20; i++) {
+  // Poll up to 15s — case-insensitive
+  for (let i = 0; i < 60; i++) {
     const chain = await eth.request({ method: 'eth_chainId' }) as string
-    if (chain === '0x4CEF52') return
+    if (chain.toLowerCase() === ARC_CHAIN_ID) return
     await new Promise(r => setTimeout(r, 250))
   }
-  throw new Error('Chain switch timed out. Please switch to Arc Testnet manually in MetaMask.')
+  throw new Error('Chain switch timed out. Please switch to Arc Testnet manually in your wallet.')
 }
