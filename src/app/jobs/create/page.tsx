@@ -182,7 +182,7 @@ export default function CreateJobPage() {
               {error && <div style={{ marginTop: 14, padding: '12px 16px', borderRadius: 10, background: 'rgba(244,67,54,0.1)', border: '1px solid rgba(244,67,54,0.3)', color: '#f44336', fontSize: 13, textAlign: 'left' }}>{error}</div>}
               <div style={{ marginTop: 24, padding: '16px 20px', borderRadius: 12, background: 'rgba(91,138,247,0.05)', border: '1px solid rgba(91,138,247,0.15)', textAlign: 'left' }}>
                 <p style={{ color: '#5b8af7', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>How it works</p>
-                {['Connect wallet and fill in job details', 'Sign 3 transactions: create job → set budget → fund escrow', 'Provider completes the work and claims USDC payment'].map((t, i) => (
+                {['Connect wallet and fill in job details', 'Sign 4 transactions: create job → set budget → approve USDC → fund escrow', 'Provider completes the work and claims USDC payment'].map((t, i) => (
                   <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 7 }}>
                     <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(91,138,247,0.2)', color: '#5b8af7', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</span>
                     <span style={{ color: '#555', fontSize: 13 }}>{t}</span>
@@ -246,7 +246,7 @@ export default function CreateJobPage() {
                   color: (busy || !description.trim() || !budget || !provider.trim()) ? '#555' : '#000' }}>
                 {busy ? 'Processing...' : `Post Job — $${budget || '0'} USDC`}
               </button>
-              <p style={{ color: '#333', fontSize: 11, marginTop: 10, textAlign: 'center' }}>3 transactions required: create → budget → fund escrow</p>
+              <p style={{ color: '#333', fontSize: 11, marginTop: 10, textAlign: 'center' }}>4 transactions required: create → budget → approve USDC → fund escrow</p>
             </div>
           )}
 
