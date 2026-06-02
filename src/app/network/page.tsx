@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import NavHeader from '@/components/NavHeader'
 
 interface NetworkData {
   latestBlock: string
@@ -85,25 +86,7 @@ export default function NetworkPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a14', color: '#e8e8f0', fontFamily: "'Inter', sans-serif" }}>
 
-      <header style={{ borderBottom: '1px solid #1a1a28', padding: '0 24px', background: '#0d0d1a', display: 'flex', alignItems: 'center' }}>
-        <Link href="/" style={{ color: '#00d4aa', textDecoration: 'none', fontWeight: 700, fontSize: 15, padding: '16px 0', marginRight: 8 }}>Arc Agent Explorer</Link>
-        <span style={{ color: '#2a2a3a', margin: '0 12px' }}>|</span>
-        <nav style={{ display: 'flex', gap: 0 }}>
-          {nav.map(({ href, label, active }) => (
-            <Link key={href} href={href} style={{
-              padding: '16px 14px', fontSize: 13, fontWeight: 600, textDecoration: 'none',
-              color: active ? '#f7a35b' : '#555',
-              borderBottom: active ? '2px solid #f7a35b' : '2px solid transparent',
-            }}>{label}</Link>
-          ))}
-        </nav>
-        <div style={{ marginLeft: 'auto' }}>
-          <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer"
-            style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, color: '#00d4aa', border: '1px solid rgba(0,212,170,0.3)', textDecoration: 'none', background: 'rgba(0,212,170,0.08)' }}>
-            Get Test USDC
-          </a>
-        </div>
-      </header>
+      <NavHeader />
 
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 16px' }}>
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import NavHeader from '@/components/NavHeader'
 
 interface Job {
   id: string
@@ -98,23 +99,7 @@ export default function JobsPage() {
     <div style={{ minHeight: '100vh', background: '#0a0a14', color: '#e8e8f0', fontFamily: "'Inter', sans-serif" }}>
 
       {/* Header */}
-      <header style={{ borderBottom: '1px solid #1a1a28', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 20, background: '#0d0d1a' }}>
-        <Link href="/" style={{ color: '#00d4aa', textDecoration: 'none', fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em' }}>
-          Arc Agent Explorer
-        </Link>
-        <span style={{ color: '#2a2a3a', fontSize: 14 }}>|</span>
-        <span style={{ color: '#e8e8f0', fontWeight: 600, fontSize: 14 }}>Jobs Board</span>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Link href="/" style={{ color: '#5b8af7', fontSize: 13, textDecoration: 'none' }}>← Agents</Link>
-          <a
-            href="https://faucet.circle.com"
-            target="_blank" rel="noopener noreferrer"
-            style={{ background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.3)', borderRadius: 8, padding: '5px 12px', color: '#00d4aa', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}
-          >
-            Get Test USDC
-          </a>
-        </div>
-      </header>
+      <NavHeader />
 
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 16px' }}>
 

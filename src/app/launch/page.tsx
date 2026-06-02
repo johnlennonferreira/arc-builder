@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi } from 'viem'
 
 const ARC_TESTNET = {
@@ -132,15 +133,7 @@ export default function LaunchPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a14', color: '#e8e8f0', fontFamily: "'Inter', sans-serif" }}>
 
-      <header style={{ borderBottom: '1px solid #1a1a28', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 20, background: '#0d0d1a' }}>
-        <Link href="/" style={{ color: '#00d4aa', textDecoration: 'none', fontWeight: 700, fontSize: 16 }}>Arc Agent Explorer</Link>
-        <span style={{ color: '#2a2a3a' }}>|</span>
-        <span style={{ color: '#e8e8f0', fontWeight: 600, fontSize: 14 }}>Agent Launchpad</span>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 12 }}>
-          <Link href="/jobs" style={{ color: '#5b8af7', fontSize: 13, textDecoration: 'none' }}>Jobs Board</Link>
-          <Link href="/" style={{ color: '#555', fontSize: 13, textDecoration: 'none' }}>Explorer</Link>
-        </div>
-      </header>
+      <NavHeader />
 
       <main style={{ maxWidth: 580, margin: '0 auto', padding: '48px 16px' }}>
 

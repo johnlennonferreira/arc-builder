@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import NavHeader from '@/components/NavHeader'
 
 interface Agent {
   id: string
@@ -276,35 +277,7 @@ export default function Home() {
   return (
     <main style={{ minHeight: '100vh', background: '#08080f' }}>
       {/* Header */}
-      <header style={{ borderBottom: '1px solid #13131f', position: 'sticky', top: 0, zIndex: 40, background: 'rgba(8,8,15,0.96)', backdropFilter: 'blur(16px)', padding: '0 24px', display: 'flex', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '13px 0', marginRight: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 13 }}>A</div>
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>Arc Agent Explorer</span>
-        </div>
-        <span style={{ color: '#2a2a3a', margin: '0 8px' }}>|</span>
-        <nav style={{ display: 'flex' }}>
-          {([
-            { href: '/', label: 'Agents', active: true },
-            { href: '/jobs', label: 'Jobs', active: false },
-            { href: '/launch', label: 'Register', active: false },
-            { href: '/network', label: 'Network', active: false },
-          ] as { href: string; label: string; active: boolean }[]).map(({ href, label, active }) => (
-            <Link key={href} href={href} style={{
-              padding: '16px 12px', fontSize: 13, fontWeight: 600, textDecoration: 'none',
-              color: active ? '#00d4aa' : '#555',
-              borderBottom: active ? '2px solid #00d4aa' : '2px solid transparent',
-            }}>{label}</Link>
-          ))}
-        </nav>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <LiveBlock block={latestBlock} />
-          <span style={{ background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.25)', borderRadius: 20, padding: '2px 10px', color: '#00d4aa', fontSize: 11, fontWeight: 700 }}>Testnet</span>
-          <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer"
-            style={{ padding: '5px 12px', borderRadius: 8, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', color: '#00d4aa', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
-            Get USDC
-          </a>
-        </div>
-      </header>
+      <NavHeader right={<LiveBlock block={latestBlock} />} />
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
         {/* Hero */}
