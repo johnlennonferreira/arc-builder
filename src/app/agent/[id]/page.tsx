@@ -1,5 +1,6 @@
 import { createPublicClient, http, type Chain } from 'viem'
 import Link from 'next/link'
+import NavHeader from '@/components/NavHeader'
 import ShareButton from './ShareButton'
 
 const arcTestnet: Chain = {
@@ -49,6 +50,8 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
   let metadataURI = ''
   let reputation = 0
   let error = false
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let metadata: Record<string, any> | null = null
 
   try {
     const [uri, ownerAddr, rep] = await Promise.all([
@@ -63,22 +66,29 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
     error = true
   }
 
-  const isIPFS = metadataURI.startsWith('ipfs://')
+  // Decode metadata from URI
+  if (metadataURI) {
+    try {
+      if (metadataURI.startsWith('data:application/json,')) {
+        metadata = JSON.parse(decodeURIComponent(metadataURI.slice('data:application/json,'.length)))
+      } else if (metadataURI.startsWith('ipfs://')) {
+        const cid = metadataURI.slice(7)
+        const res = await fetch('https://ipfs.io/ipfs/' + cid, { signal: AbortSignal.timeout(4000) })
+        if (res.ok) metadata = await res.json()
+      } else if (metadataURI.startsWith('http')) {
+        const res = await fetch(metadataURI, { signal: AbortSignal.timeout(4000) })
+        if (res.ok) metadata = await res.json()
+      }
+    } catch { /* metadata optional */ }
+  }
+
+    const isIPFS = metadataURI.startsWith('ipfs://')
   const scoreColor = reputation >= 80 ? '#00d4aa' : reputation >= 50 ? '#7aa4f9' : reputation > 0 ? '#f7a44f' : '#3a3a52'
   const shareUrl = `https://arc-agent-explorer.vercel.app/agent/${id}`
 
   return (
     <main style={{ minHeight: '100vh', background: '#08080f', fontFamily: 'Inter, sans-serif' }}>
-      <header style={{ borderBottom: '1px solid #13131f', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, position: 'sticky', top: 0, background: 'rgba(8,8,15,0.9)', backdropFilter: 'blur(16px)', zIndex: 40 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>A</div>
-        <div>
-          <p style={{ color: '#fff', fontWeight: 600, fontSize: 15, margin: 0, lineHeight: 1 }}>Arc Agent Explorer</p>
-          <p style={{ color: '#3a3a52', fontSize: 11, margin: 0 }}>ERC-8004 Identity Registry</p>
-        </div>
-        <Link href="/" style={{ marginLeft: 'auto', color: '#3a3a52', fontSize: 13, textDecoration: 'none' }}>
-          ← All Agents
-        </Link>
-      </header>
+      <NavHeader />
 
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
         {error ? (
@@ -127,7 +137,21 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
 
-            {metadataURI && (
+            {metadata && (metadata.name || metadata.description) && (
+              <div style={{ background: 'linear-gradient(145deg,#111118,#0e0e16)', border: '1px solid rgba(0,212,170,0.2)', borderRadius: 14, padding: 20, marginBottom: 16 }}>
+                <p style={{ color: '#3a3a52', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>Agent Profile</p>
+                {metadata.name && <p style={{ color: '#e8e8f0', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>{String(metadata.name)}</p>}
+                {metadata.description && <p style={{ color: '#6b6a7e', fontSize: 14, margin: '0 0 10px', lineHeight: 1.6 }}>{String(metadata.description)}</p>}
+                {Array.isArray(metadata.capabilities) && (
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {(metadata.capabilities as string[]).map((cap, i) => (
+                      <span key={i} style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20, background: 'rgba(91,138,247,0.1)', border: '1px solid rgba(91,138,247,0.25)', color: '#7aa4f9' }}>{cap}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+                        {metadataURI && (
               <div style={{ background: 'linear-gradient(145deg,#111118,#0e0e16)', border: '1px solid #1a1a28', borderRadius: 14, padding: 20, marginBottom: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                   <p style={{ color: '#3a3a52', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Metadata URI</p>

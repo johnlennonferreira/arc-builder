@@ -1,5 +1,6 @@
 'use client'
 
+import NavHeader from '@/components/NavHeader'
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 
@@ -92,18 +93,7 @@ export default function OwnerPage({ params }: { params: Promise<{ address: strin
 
   return (
     <main style={{ minHeight: '100vh', background: '#08080f', fontFamily: 'Inter, sans-serif' }}>
-      <header style={{ borderBottom: '1px solid #13131f', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, position: 'sticky', top: 0, background: 'rgba(8,8,15,0.92)', backdropFilter: 'blur(16px)', zIndex: 40 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>A</div>
-        <div>
-          <p style={{ color: '#fff', fontWeight: 600, fontSize: 15, margin: 0, lineHeight: 1 }}>Arc Agent Explorer</p>
-          <p style={{ color: '#3a3a52', fontSize: 11, margin: 0 }}>Owner Profile</p>
-        </div>
-        <Link href="/" style={{ marginLeft: 'auto', color: '#3a3a52', fontSize: 13, textDecoration: 'none' }}
-          onMouseOver={e => (e.currentTarget.style.color = '#00d4aa')}
-          onMouseOut={e => (e.currentTarget.style.color = '#3a3a52')}>
-          Back to Explorer
-        </Link>
-      </header>
+      <NavHeader />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
         <div style={{ marginBottom: 28 }}>
