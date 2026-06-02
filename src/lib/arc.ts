@@ -1,7 +1,7 @@
 import { createPublicClient, http, type Chain } from 'viem'
 
 export const arcTestnet: Chain = {
-  id: 5038674,
+  id: 5042002,
   name: 'Arc Testnet',
   nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
   rpcUrls: {
