@@ -276,32 +276,33 @@ export default function Home() {
   return (
     <main style={{ minHeight: '100vh', background: '#08080f' }}>
       {/* Header */}
-      <header style={{ borderBottom: '1px solid #13131f', position: 'sticky', top: 0, zIndex: 40, background: 'rgba(8,8,15,0.92)', backdropFilter: 'blur(16px)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>A</div>
-            <div>
-              <p style={{ color: '#fff', fontWeight: 600, fontSize: 15, margin: 0, lineHeight: 1 }}>Arc Agent Explorer</p>
-              <p style={{ color: '#3a3a52', fontSize: 11, margin: 0 }}>ERC-8004 Identity Registry</p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <LiveBlock block={latestBlock} />
-            <span className="tag tag-green">Testnet</span>
-            <a href="/jobs" style={{ padding: '6px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#5b8af7', border: '1px solid rgba(91,138,247,0.3)', textDecoration: 'none', background: 'rgba(91,138,247,0.08)' }}>
-              Jobs Board
-            </a>
-            <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', borderRadius: 8, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', color: '#00d4aa', fontSize: 12, fontWeight: 600, textDecoration: 'none', transition: 'all 0.15s' }}
-              onMouseOver={e => { e.currentTarget.style.background = 'rgba(0,212,170,0.15)' }}
-              onMouseOut={e => { e.currentTarget.style.background = 'rgba(0,212,170,0.08)' }}>
-              <span>💧</span> Get Test USDC
-            </a>
-            <a href="https://docs.arc.io/arc/tutorials/register-your-first-ai-agent" target="_blank" rel="noopener noreferrer"
-              className="btn btn-ghost" style={{ display: 'flex' }}>
-              Register Agent ↗
-            </a>
-          </div>
+      <header style={{ borderBottom: '1px solid #13131f', position: 'sticky', top: 0, zIndex: 40, background: 'rgba(8,8,15,0.96)', backdropFilter: 'blur(16px)', padding: '0 24px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '13px 0', marginRight: 10 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 13 }}>A</div>
+          <span style={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>Arc Agent Explorer</span>
+        </div>
+        <span style={{ color: '#2a2a3a', margin: '0 8px' }}>|</span>
+        <nav style={{ display: 'flex' }}>
+          {([
+            { href: '/', label: 'Agents', active: true },
+            { href: '/jobs', label: 'Jobs', active: false },
+            { href: '/launch', label: 'Register', active: false },
+            { href: '/network', label: 'Network', active: false },
+          ] as { href: string; label: string; active: boolean }[]).map(({ href, label, active }) => (
+            <Link key={href} href={href} style={{
+              padding: '16px 12px', fontSize: 13, fontWeight: 600, textDecoration: 'none',
+              color: active ? '#00d4aa' : '#555',
+              borderBottom: active ? '2px solid #00d4aa' : '2px solid transparent',
+            }}>{label}</Link>
+          ))}
+        </nav>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <LiveBlock block={latestBlock} />
+          <span style={{ background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.25)', borderRadius: 20, padding: '2px 10px', color: '#00d4aa', fontSize: 11, fontWeight: 700 }}>Testnet</span>
+          <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer"
+            style={{ padding: '5px 12px', borderRadius: 8, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', color: '#00d4aa', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
+            Get USDC
+          </a>
         </div>
       </header>
 
