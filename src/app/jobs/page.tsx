@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi, keccak256, toBytes } from 'viem'
+import { ensureArcTestnet } from '@/lib/switchChain'
 import { useWallet } from '@/components/WalletProvider'
 import { useToast } from '@/components/Toast'
 
@@ -99,7 +100,7 @@ export default function JobsPage() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const eth = (window as any).ethereum
-      try { await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE252' }] }) } catch { /* ok */ }
+      await ensureArcTestnet()
       const wallet = createWalletClient({ account: account as `0x${string}`, chain: ARC, transport: custom(eth) })
       const pub    = createPublicClient({ chain: ARC, transport: http('https://rpc.testnet.arc.network') })
       const hash32 = keccak256(toBytes(deliverable.trim()))
@@ -121,6 +122,7 @@ export default function JobsPage() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const eth = (window as any).ethereum
+      await ensureArcTestnet()
       const wallet = createWalletClient({ account: account as `0x${string}`, chain: ARC, transport: custom(eth) })
       const pub    = createPublicClient({ chain: ARC, transport: http('https://rpc.testnet.arc.network') })
       const ZERO32 = '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`

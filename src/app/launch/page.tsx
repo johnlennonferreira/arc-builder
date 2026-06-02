@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi } from 'viem'
+import { ensureArcTestnet } from '@/lib/switchChain'
 import { useWallet } from '@/components/WalletProvider'
 import { useToast } from '@/components/Toast'
 
@@ -39,7 +40,7 @@ export default function LaunchPage() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const eth = (window as any).ethereum
-      try { await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE252' }] }) } catch { /* ok */ }
+      await ensureArcTestnet()
       const walletClient = createWalletClient({ account: account as `0x${string}`, chain: ARC_TESTNET, transport: custom(eth) })
       const publicClient = createPublicClient({ chain: ARC_TESTNET, transport: http('https://rpc.testnet.arc.network') })
 

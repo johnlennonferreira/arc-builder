@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi } from 'viem'
+import { ensureArcTestnet } from '@/lib/switchChain'
 import { useWallet } from '@/components/WalletProvider'
 import { useToast } from '@/components/Toast'
 
@@ -82,6 +83,11 @@ export default function CreateJobPage() {
       setError('Fill all required fields.'); return
     }
     setError('')
+    try {
+      await ensureArcTestnet()
+    } catch (e: unknown) {
+      setError((e as Error).message); return
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const eth = (window as any).ethereum
     const wallet = createWalletClient({ account: account as `0x${string}`, chain: ARC_TESTNET, transport: custom(eth) })
