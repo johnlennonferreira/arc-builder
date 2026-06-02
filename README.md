@@ -7,6 +7,8 @@
 
 > Open-source explorer for ERC-8004 AI agents on the Arc Testnet — live data from the IdentityRegistry smart contract.
 
+![Arc Agent Explorer](./image.png)
+
 **🌐 Live:** https://arc-agent-explorer.vercel.app
 
 ---
