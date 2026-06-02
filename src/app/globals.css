@@ -104,3 +104,11 @@ body {
   .score-low  { color: #f7a44f; }
   .score-zero { color: #3a3a52; }
 }
+
+/* Hide nav scrollbar on mobile */
+nav::-webkit-scrollbar { display: none; }
+
+/* Mobile grid adjustments */
+@media (max-width: 600px) {
+  .card { border-radius: 10px !important; }
+}
