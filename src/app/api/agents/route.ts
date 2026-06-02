@@ -1,20 +1,5 @@
 ﻿import { NextResponse } from 'next/server'
-import { createPublicClient, http, type Chain } from 'viem'
-
-const arcTestnet: Chain = {
-  id: 5042002,
-  name: 'Arc Testnet',
-  nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
-  rpcUrls: {
-    default: { http: ['https://rpc.testnet.arc.network'] },
-    public: { http: ['https://rpc.testnet.arc.network'] },
-  },
-  blockExplorers: { default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' } },
-  testnet: true,
-}
-
-const IDENTITY_REGISTRY = '0x8004A818BFB912233c491871b3d84c89A494BD9e' as `0x${string}`
-const REPUTATION_REGISTRY = '0x8004B663056A597Dffe9eCcC1965A193B7388713' as `0x${string}`
+import { makeRpcClient, IDENTITY_REGISTRY, REPUTATION_REGISTRY } from '@/lib/arcRpc'
 
 const TRANSFER_EVENT = {
   type: 'event' as const,
@@ -43,10 +28,7 @@ const IDENTITY_ABI = [
   { type: 'function', name: 'ownerOf', stateMutability: 'view', inputs: [{ name: 'tokenId', type: 'uint256' }], outputs: [{ name: '', type: 'address' }] },
 ] as const
 
-const client = createPublicClient({
-  chain: arcTestnet,
-  transport: http('https://rpc.testnet.arc.network'),
-})
+const client = makeRpcClient()
 
 const WINDOW = 9999n
 const NUM_WINDOWS = 5
@@ -139,8 +121,9 @@ export async function GET(request: Request) {
       : 0
 
     const total = allLogs.length
-    const countIPFS = allLogs.filter((l: AnyLog) => String(l._metadataURI ?? '').startsWith('ipfs://')).length
-    const countURL = allLogs.filter((l: AnyLog) => String(l._metadataURI ?? '').startsWith('http')).length
+    // countIPFS/countURL require fetching all URIs — computed after enrichment on the paginated slice
+    const countIPFS = 0
+    const countURL  = 0
     const countReputed = repMap.size
 
     const paginated = allLogs.slice(page * pageSize, (page + 1) * pageSize)

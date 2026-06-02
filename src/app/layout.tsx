@@ -19,13 +19,13 @@ export const metadata: Metadata = {
     url: 'https://arc-agent-explorer.vercel.app',
     siteName: 'Arc Agent Explorer',
     type: 'website',
-    images: [{ url: 'https://arc-agent-explorer.vercel.app/og-image.png', width: 1200, height: 630, alt: 'Arc Agent Explorer' }],
+    images: [{ url: 'https://arc-agent-explorer.vercel.app/api/og', width: 1200, height: 630, alt: 'Arc Agent Explorer' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Arc Agent Explorer — AI Agent Economy',
     description: 'The first complete interface for the Arc agentic economy. Explore agents, jobs, register, and monitor — all on-chain.',
-    images: ['https://arc-agent-explorer.vercel.app/og-image.png'],
+    images: ['https://arc-agent-explorer.vercel.app/api/og'],
   },
 }
 

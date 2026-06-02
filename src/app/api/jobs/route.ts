@@ -1,19 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createPublicClient, http, type Chain } from 'viem'
-
-const arcTestnet: Chain = {
-  id: 5042002,
-  name: 'Arc Testnet',
-  nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
-  rpcUrls: {
-    default: { http: ['https://rpc.testnet.arc.network'] },
-    public: { http: ['https://rpc.testnet.arc.network'] },
-  },
-  blockExplorers: { default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' } },
-  testnet: true,
-}
-
-const AGENTIC_COMMERCE = '0x0747EEf0706327138c69792bF28Cd525089e4583' as `0x${string}`
+import { makeRpcClient, AGENTIC_COMMERCE } from '@/lib/arcRpc'
 
 const JOB_CREATED_EVENT = {
   type: 'event' as const,
@@ -56,10 +42,7 @@ const GET_JOB_ABI = [
 
 const STATUS_LABELS = ['Open', 'Funded', 'Submitted', 'Completed', 'Rejected', 'Expired']
 
-const rpcClient = createPublicClient({
-  chain: arcTestnet,
-  transport: http('https://rpc.testnet.arc.network'),
-})
+const rpcClient = makeRpcClient()
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyLog = any

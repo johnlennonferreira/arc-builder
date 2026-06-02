@@ -331,9 +331,9 @@ export default function JobsPage() {
                 <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #14141f' }}>
                   <span style={{ color: '#444', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
                   {link ? (
-                    <a href={'/owner/' + value} style={{ color: '#5b8af7', fontSize: 12, textDecoration: 'none', fontFamily: 'JetBrains Mono, monospace' }} onClick={e => e.stopPropagation()}>
+                    <Link href={'/owner/' + value} style={{ color: '#5b8af7', fontSize: 12, textDecoration: 'none', fontFamily: 'JetBrains Mono, monospace' }} onClick={e => e.stopPropagation()}>
                       {value.slice(0,8)}...{value.slice(-6)}
-                    </a>
+                    </Link>
                   ) : (
                     <span style={{ color: '#888', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }}>{value.slice(0,8)}...{value.slice(-6)}</span>
                   )}

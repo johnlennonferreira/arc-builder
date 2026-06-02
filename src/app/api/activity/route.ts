@@ -1,19 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createPublicClient, http, type Chain } from 'viem'
+import { makeRpcClient, AGENTIC_COMMERCE as COMMERCE, IDENTITY_REGISTRY as IDENTITY } from '@/lib/arcRpc'
 
-const arcTestnet: Chain = {
-  id: 5042002,
-  name: 'Arc Testnet',
-  nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
-  rpcUrls: { default: { http: ['https://rpc.testnet.arc.network'] }, public: { http: ['https://rpc.testnet.arc.network'] } },
-  blockExplorers: { default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' } },
-  testnet: true,
-}
-
-const COMMERCE = '0x0747EEf0706327138c69792bF28Cd525089e4583' as `0x${string}`
-const IDENTITY = '0x8004A818BFB912233c491871b3d84c89A494BD9e' as `0x${string}`
-
-const pub = createPublicClient({ chain: arcTestnet, transport: http('https://rpc.testnet.arc.network') })
+const pub = makeRpcClient()
 
 const JOB_CREATED   = { type: 'event' as const, name: 'JobCreated',      inputs: [{ indexed: true, name: 'jobId', type: 'uint256' }, { indexed: true, name: 'client', type: 'address' }, { indexed: true, name: 'provider', type: 'address' }, { indexed: false, name: 'evaluator', type: 'address' }, { indexed: false, name: 'expiredAt', type: 'uint256' }, { indexed: false, name: 'hook', type: 'address' }] }
 const PAY_RELEASED  = { type: 'event' as const, name: 'PaymentReleased', inputs: [{ indexed: true, name: 'jobId', type: 'uint256' }, { indexed: true, name: 'recipient', type: 'address' }, { indexed: false, name: 'amount', type: 'uint256' }] }
