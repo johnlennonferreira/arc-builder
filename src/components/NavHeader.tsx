@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useWallet } from '@/components/WalletProvider'
 import { usePathname } from 'next/navigation'
 
 const LINKS = [
@@ -13,6 +14,7 @@ const LINKS = [
 
 export default function NavHeader({ right }: { right?: React.ReactNode }) {
   const pathname = usePathname()
+  const { account, connecting, connect, disconnect } = useWallet()
 
   return (
     <header style={{

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi } from 'viem'
+import { useWallet } from '@/components/WalletProvider'
+import { useToast } from '@/components/Toast'
 
 const ARC_TESTNET = {
   id: 5042002,
@@ -24,6 +26,8 @@ function shorten(addr: string) {
 }
 
 export default function LaunchPage() {
+  const { account: walletAccount, connect: walletConnect, connecting: walletConnecting } = useWallet()
+  const { success, error: toastError } = useToast()
   const [step, setStep]       = useState<Step>('idle')
   const [account, setAccount] = useState<string>('')
   const [name, setName]       = useState('')

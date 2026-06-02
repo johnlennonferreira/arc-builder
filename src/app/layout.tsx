@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import AgentBot from '@/components/AgentBot'
+import AppProviders from '@/components/AppProviders'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,8 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={inter.className} style={{ backgroundColor: '#08080f' }}>
-        {children}
-        <AgentBot />
+        <AppProviders>{children}<AgentBot /></AppProviders>
       </body>
     </html>
   )

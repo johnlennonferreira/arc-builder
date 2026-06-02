@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi } from 'viem'
+import { useWallet } from '@/components/WalletProvider'
+import { useToast } from '@/components/Toast'
 
 const ARC_TESTNET = {
   id: 5042002,
@@ -41,6 +43,9 @@ const labelStyle = {
 }
 
 export default function CreateJobPage() {
+  const { account: walletAccount, connect: walletConnect } = useWallet()
+  const { success, error: toastError, info } = useToast()
+  void walletAccount; void walletConnect; void toastError; void info; void success
   const [step, setStep]       = useState<Step>('idle')
   const [account, setAccount] = useState('')
   const [provider, setProvider] = useState('')

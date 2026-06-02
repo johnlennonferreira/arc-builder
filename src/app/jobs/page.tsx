@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi, keccak256, toBytes } from 'viem'
+import { useWallet } from '@/components/WalletProvider'
+import { useToast } from '@/components/Toast'
 
 const ARC = {
   id: 5042002, name: 'Arc Testnet',
@@ -57,11 +59,12 @@ export default function JobsPage() {
   const [filter, setFilter]     = useState<Filter>('all')
   const [page, setPage]         = useState(0)
   const [selected, setSelected] = useState<Job | null>(null)
+  const [search, setSearch] = useState('')
   const pageSize = 20
 
-  // Wallet state
-  const [account, setAccount]   = useState('')
-  const [connecting, setConnecting] = useState(false)
+  // Wallet from context
+  const { account, connect: connectWallet, connecting } = useWallet()
+  const { success, error: toastError, info } = useToast()
 
   // Action state
   const [deliverable, setDeliverable] = useState('')
@@ -88,23 +91,7 @@ export default function JobsPage() {
     if (!selected) { setDeliverable(''); setTxStep('idle'); setTxHash(''); setTxError('') }
   }, [selected])
 
-  async function connectWallet() {
-    setConnecting(true)
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const eth = (window as any).ethereum
-      if (!eth) { alert('Please install MetaMask to perform actions.'); return }
-      const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' })
-      try { await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE252' }] }) }
-      catch (e: unknown) {
-        if ((e as { code?: number }).code === 4902) {
-          await eth.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x4CE252', chainName: 'Arc Testnet', nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 }, rpcUrls: ['https://rpc.testnet.arc.network'], blockExplorerUrls: ['https://testnet.arcscan.app'] }] })
-        }
-      }
-      setAccount(accounts[0])
-    } catch { /* cancelled */ }
-    finally { setConnecting(false) }
-  }
+  // connectWallet comes from useWallet() context above
 
   async function submitWork(job: Job) {
     if (!deliverable.trim()) { setTxError('Enter a deliverable description or URL.'); return }
@@ -119,11 +106,12 @@ export default function JobsPage() {
       setTxHash(h); setTxStep('confirming')
       await pub.waitForTransactionReceipt({ hash: h })
       setTxStep('done')
+      success('Work submitted! Waiting for evaluator approval.')
       setTimeout(() => { setSelected(null); fetchJobs() }, 2000)
     } catch (e: unknown) {
       const msg = (e as Error).message ?? 'Transaction failed.'
-      setTxError(msg.toLowerCase().includes('user rejected') ? 'Transaction cancelled.' : msg.slice(0, 180))
-      setTxStep('error')
+      const friendly = msg.toLowerCase().includes('user rejected') ? 'Transaction cancelled.' : msg.slice(0, 180)
+      toastError(friendly); setTxError(friendly); setTxStep('error')
     }
   }
 
@@ -220,6 +208,11 @@ export default function JobsPage() {
             + Post Job
           </Link>
           <button onClick={fetchJobs} style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer', background: 'transparent', border: '1px solid #2a2a3a', color: '#555', fontWeight: 600 }}>↻</button>
+          <input
+            value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search jobs..."
+            style={{ padding: '6px 14px', borderRadius: 20, fontSize: 13, background: 'transparent', border: '1px solid #2a2a3a', color: '#e8e8f0', outline: 'none', width: 180 }}
+          />
         </div>
 
         {/* Job list */}
@@ -231,7 +224,7 @@ export default function JobsPage() {
           <div style={{ textAlign: 'center', padding: '60px 0', color: '#555' }}>No jobs found.</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {jobs.map(job => (
+            {jobs.filter(j => !search || j.description.toLowerCase().includes(search.toLowerCase()) || j.id.includes(search)).map(job => (
               <div key={job.id} onClick={() => setSelected(job)}
                 style={{ background: '#0d0d1a', border: '1px solid #1a1a28', borderRadius: 12, padding: '18px 22px', cursor: 'pointer', transition: 'border-color 0.15s' }}
                 onMouseEnter={e => (e.currentTarget.style.borderColor = '#2a2a4a')}
