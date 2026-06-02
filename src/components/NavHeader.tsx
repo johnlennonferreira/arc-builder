@@ -7,11 +7,13 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 const LINKS = [
-  { href: '/launch',   label: 'Register' },
-  { href: '/',         label: 'Agents'   },
-  { href: '/jobs',     label: 'Jobs'     },
-  { href: '/network',  label: 'Network'  },
-  { href: '/api-docs', label: 'API'      },
+  { href: '/launch',       label: 'Register'     },
+  { href: '/',             label: 'Agents'       },
+  { href: '/jobs',         label: 'Jobs'         },
+  { href: '/leaderboard',  label: 'Leaderboard'  },
+  { href: '/activity',     label: 'Activity'     },
+  { href: '/network',      label: 'Network'      },
+  { href: '/api-docs',     label: 'API'          },
 ]
 
 export default function NavHeader({ right }: { right?: React.ReactNode }) {

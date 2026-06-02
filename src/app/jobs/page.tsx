@@ -87,6 +87,12 @@ export default function JobsPage() {
   useEffect(() => { fetchJobs() }, [fetchJobs])
   useEffect(() => { setPage(0) }, [filter])
 
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const t = setInterval(() => { fetchJobs() }, 30_000)
+    return () => clearInterval(t)
+  }, [fetchJobs])
+
   // Reset action state when modal closes
   useEffect(() => {
     if (!selected) { setDeliverable(''); setTxStep('idle'); setTxHash(''); setTxError('') }
@@ -227,7 +233,11 @@ export default function JobsPage() {
           <div style={{ textAlign: 'center', padding: '60px 0', color: '#555' }}>No jobs found.</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {jobs.filter(j => !search || j.description.toLowerCase().includes(search.toLowerCase()) || j.id.includes(search)).map(job => (
+            {jobs.filter(j => {
+              if (!search) return true
+              const q = search.replace(/^#/, '').toLowerCase()
+              return j.id === q || j.description.toLowerCase().includes(q) || j.client.toLowerCase().includes(q) || j.provider.toLowerCase().includes(q)
+            }).map(job => (
               <div key={job.id} onClick={() => setSelected(job)}
                 style={{ background: '#0d0d1a', border: '1px solid #1a1a28', borderRadius: 12, padding: '18px 22px', cursor: 'pointer', transition: 'border-color 0.15s' }}
                 onMouseEnter={e => (e.currentTarget.style.borderColor = '#2a2a4a')}
