@@ -7,7 +7,6 @@ import { createWalletClient, createPublicClient, custom, http, parseAbi } from '
 import { ensureArcTestnet } from '@/lib/switchChain'
 import { arcTestnet, ARC_RPC_URL, USDC_ADDRESS } from '@/lib/arc'
 import { useWallet } from '@/components/WalletProvider'
-import { useToast } from '@/components/Toast'
 
 const AGENTIC_COMMERCE = '0x0747EEf0706327138c69792bF28Cd525089e4583' as `0x${string}`
 
@@ -37,8 +36,6 @@ const labelStyle = {
 
 export default function CreateJobPage() {
   const { account, connect } = useWallet()
-  const { success, error: toastError, info } = useToast()
-  void toastError; void info; void success
   const [step, setStep] = useState<Step>('idle')
   const [provider, setProvider] = useState('')
   const [description, setDescription] = useState('')

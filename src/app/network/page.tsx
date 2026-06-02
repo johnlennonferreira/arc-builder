@@ -78,13 +78,6 @@ export default function NetworkPage() {
       .catch(() => { setError(true); setLoading(false) })
   }, [])
 
-  const nav = [
-    { href: '/', label: 'Agents' },
-    { href: '/jobs', label: 'Jobs' },
-    { href: '/launch', label: 'Register' },
-    { href: '/network', label: 'Network', active: true },
-  ]
-
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a14', color: '#e8e8f0', fontFamily: "'Inter', sans-serif" }}>
 

@@ -1,21 +1,7 @@
-import { createPublicClient, http, type Chain } from 'viem'
 import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import ShareButton from './ShareButton'
-
-const arcTestnet: Chain = {
-  id: 5042002,
-  name: 'Arc Testnet',
-  nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
-  rpcUrls: {
-    default: { http: ['https://rpc.testnet.arc.network'] },
-    public: { http: ['https://rpc.testnet.arc.network'] },
-  },
-  blockExplorers: { default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' } },
-  testnet: true,
-}
-
-const client = createPublicClient({ chain: arcTestnet, transport: http('https://rpc.testnet.arc.network') })
+import { publicClient as client } from '@/lib/arc'
 
 const IDENTITY = '0x8004A818BFB912233c491871b3d84c89A494BD9e' as `0x${string}`
 const REPUTATION = '0x8004B663056A597Dffe9eCcC1965A193B7388713' as `0x${string}`
@@ -82,7 +68,7 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
     } catch { /* metadata optional */ }
   }
 
-    const isIPFS = metadataURI.startsWith('ipfs://')
+  const isIPFS = metadataURI.startsWith('ipfs://')
   const scoreColor = reputation >= 80 ? '#00d4aa' : reputation >= 50 ? '#7aa4f9' : reputation > 0 ? '#f7a44f' : '#3a3a52'
   const shareUrl = `https://arc-agent-explorer.vercel.app/agent/${id}`
 
