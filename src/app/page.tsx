@@ -288,6 +288,9 @@ export default function Home() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <LiveBlock block={latestBlock} />
             <span className="tag tag-green">Testnet</span>
+            <a href="/jobs" style={{ padding: '6px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#5b8af7', border: '1px solid rgba(91,138,247,0.3)', textDecoration: 'none', background: 'rgba(91,138,247,0.08)' }}>
+              Jobs Board
+            </a>
             <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer"
               style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', borderRadius: 8, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', color: '#00d4aa', fontSize: 12, fontWeight: 600, textDecoration: 'none', transition: 'all 0.15s' }}
               onMouseOver={e => { e.currentTarget.style.background = 'rgba(0,212,170,0.15)' }}
