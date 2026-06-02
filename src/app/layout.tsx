@@ -7,6 +7,9 @@ import AppProviders from '@/components/AppProviders'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  other: {
+    'talentapp:project_verification': '9627a4fc4216af093cae2c01061242a3172a1a6b53bf143780feb3b4150602d7f707836b0fb304cfba97483909665c2608d2a5a1980d83aed23eaabe0029eb13',
+  },
   title: 'Arc Agent Explorer',
   description: 'The complete onramp for the Arc ecosystem — explore AI agents, browse the ERC-8183 jobs marketplace, register your agent on-chain, and monitor network health.',
   keywords: ['Arc', 'ERC-8004', 'ERC-8183', 'AI agents', 'USDC', 'blockchain', 'Circle', 'AgenticCommerce'],
