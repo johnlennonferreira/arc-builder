@@ -168,14 +168,10 @@ export default function JobsPage() {
               {f.label}
             </button>
           ))}
-          <button
-            onClick={fetchJobs}
-            style={{
-              marginLeft: 'auto', padding: '6px 14px', borderRadius: 20, fontSize: 12,
-              cursor: 'pointer', background: 'transparent', border: '1px solid #2a2a3a',
-              color: '#555', fontWeight: 600,
-            }}
-          >
+          <a href="/jobs/create" style={{ padding: '6px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, color: '#000', textDecoration: 'none', background: 'linear-gradient(135deg,#5b8af7,#00d4aa)' }}>
+            + Post Job
+          </a>
+          <button onClick={fetchJobs} style={{ marginLeft: 8, padding: '6px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer', background: 'transparent', border: '1px solid #2a2a3a', color: '#555', fontWeight: 600 }}>
             ↻ Refresh
           </button>
         </div>

@@ -66,7 +66,9 @@ type AnyLog = any
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const filter   = searchParams.get('filter') ?? 'all'
+  const filter     = searchParams.get('filter') ?? 'all'
+  const clientFilter   = searchParams.get('client')?.toLowerCase() ?? null
+  const providerFilter = searchParams.get('provider')?.toLowerCase() ?? null
   const page     = parseInt(searchParams.get('page') ?? '0')
   const pageSize = parseInt(searchParams.get('pageSize') ?? '20')
 
@@ -99,7 +101,12 @@ export async function GET(request: Request) {
       return bi > ai ? 1 : -1
     })
 
-    const paginated = allLogs.slice(page * pageSize, (page + 1) * pageSize)
+    // Filter by client or provider if requested
+    let filteredLogs = allLogs
+    if (clientFilter)   filteredLogs = filteredLogs.filter((l: AnyLog) => (l.args?.client ?? '').toLowerCase() === clientFilter)
+    if (providerFilter) filteredLogs = filteredLogs.filter((l: AnyLog) => (l.args?.provider ?? '').toLowerCase() === providerFilter)
+
+    const paginated = filteredLogs.slice(page * pageSize, (page + 1) * pageSize)
 
     const enriched = await Promise.allSettled(
       paginated.map(async (log: AnyLog) => {
@@ -163,7 +170,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(
-      { jobs: result, total: allLogs.length, page, pageSize },
+      { jobs: result, total: filteredLogs.length, page, pageSize },
       { headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=60' } }
     )
   } catch (err) {
