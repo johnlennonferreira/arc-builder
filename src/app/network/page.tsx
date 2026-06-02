@@ -51,10 +51,12 @@ function BarChart({ data, color }: { data: { window: string; count: number }[]; 
 }
 
 function StatCard({ label, value, sub, color = '#e8e8f0' }: { label: string; value: string | number; sub?: string; color?: string }) {
+  const str = String(value)
+  const fontSize = str.length > 12 ? 16 : str.length > 9 ? 20 : str.length > 7 ? 24 : 28
   return (
-    <div style={{ background: '#0d0d1a', border: '1px solid #1a1a28', borderRadius: 12, padding: '20px 24px' }}>
+    <div style={{ background: '#0d0d1a', border: '1px solid #1a1a28', borderRadius: 12, padding: '20px 24px', overflow: 'hidden' }}>
       <div style={{ color: '#555', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1.1 }}>{value}</div>
+      <div style={{ fontSize, fontWeight: 800, color, lineHeight: 1.2, wordBreak: 'break-all' }}>{value}</div>
       {sub && <div style={{ color: '#3a3a52', fontSize: 12, marginTop: 4 }}>{sub}</div>}
     </div>
   )
@@ -129,7 +131,7 @@ export default function NetworkPage() {
               <StatCard label="Reputed Agents" value={data.agents.reputedCount.toLocaleString()} sub={`${data.agents.totalFeedbacks} feedbacks`} color="#5b8af7" />
               <StatCard label="Total Jobs" value={data.jobs.total.toLocaleString()} sub="ERC-8183 commerce" color="#5b8af7" />
               <StatCard label="USDC Settled" value={`$${data.jobs.totalUSDCPaid.toFixed(2)}`} sub={`${data.jobs.totalPayments} payments`} color="#f7a35b" />
-              <StatCard label="USDC Supply" value={data.usdc.totalSupply > 0 ? `$${data.usdc.totalSupply.toLocaleString()}` : '—'} sub="testnet total" color="#f7a35b" />
+              <StatCard label="USDC Supply" value={data.usdc.totalSupply > 0 ? (data.usdc.totalSupply >= 1e9 ? `${(data.usdc.totalSupply/1e9).toFixed(1)}B` : data.usdc.totalSupply >= 1e6 ? `${(data.usdc.totalSupply/1e6).toFixed(1)}M` : `${data.usdc.totalSupply.toLocaleString()}`) : '—'} sub={data.usdc.totalSupply > 0 ? `${data.usdc.totalSupply.toLocaleString()} total` : 'testnet total'} color="#f7a35b" />
             </div>
 
             {/* ── Row 2: Charts ── */}
