@@ -7,7 +7,8 @@ const LINKS = [
   { href: '/',        label: 'Agents'   },
   { href: '/jobs',    label: 'Jobs'     },
   { href: '/launch',  label: 'Register' },
-  { href: '/network', label: 'Network'  },
+  { href: '/network',  label: 'Network'  },
+  { href: '/api-docs', label: 'API'      },
 ]
 
 export default function NavHeader({ right }: { right?: React.ReactNode }) {

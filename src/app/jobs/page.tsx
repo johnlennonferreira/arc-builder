@@ -69,6 +69,7 @@ export default function JobsPage() {
   const [filter, setFilter]   = useState<Filter>('all')
   const [page, setPage]       = useState(0)
   const pageSize = 20
+  const [selected, setSelected] = useState<Job | null>(null)
 
   const fetchJobs = useCallback(async () => {
     setLoading(true)
@@ -194,9 +195,10 @@ export default function JobsPage() {
             {jobs.map(job => (
               <div
                 key={job.id}
+                onClick={() => setSelected(job)}
                 style={{
                   background: '#0d0d1a', border: '1px solid #1a1a28', borderRadius: 12,
-                  padding: '18px 22px', transition: 'border-color 0.15s',
+                  padding: '18px 22px', transition: 'border-color 0.15s', cursor: 'pointer',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.borderColor = '#2a2a4a')}
                 onMouseLeave={e => (e.currentTarget.style.borderColor = '#1a1a28')}
@@ -313,7 +315,75 @@ export default function JobsPage() {
         )}
 
         {/* Footer info */}
-        <div style={{ marginTop: 48, textAlign: 'center', color: '#2a2a3a', fontSize: 12 }}>
+        {/* Detail panel */}
+        {selected && (
+          <div onClick={() => setSelected(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: 16, padding: 28, maxWidth: 540, width: '100%', maxHeight: '85vh', overflowY: 'auto' }}>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+                <div>
+                  <span style={{ color: '#555', fontSize: 12 }}>Job </span>
+                  <span style={{ color: '#e8e8f0', fontSize: 18, fontWeight: 800 }}>#{selected.id}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <StatusBadge status={selected.status} />
+                  <button onClick={() => setSelected(null)} style={{ background: 'transparent', border: 'none', color: '#555', fontSize: 20, cursor: 'pointer' }}>×</button>
+                </div>
+              </div>
+
+              {selected.description && (
+                <div style={{ marginBottom: 20, padding: '14px 16px', borderRadius: 10, background: '#0a0a14', border: '1px solid #1a1a28' }}>
+                  <p style={{ color: '#555', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 6px' }}>Description</p>
+                  <p style={{ color: '#c8c8da', fontSize: 14, margin: 0, lineHeight: 1.6 }}>{selected.description}</p>
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+                <div style={{ padding: '14px 16px', borderRadius: 10, background: '#0a0a14', border: '1px solid #1a1a28' }}>
+                  <p style={{ color: '#555', fontSize: 11, textTransform: 'uppercase', margin: '0 0 4px' }}>Budget</p>
+                  <p style={{ color: selected.budgetUSDC > 0 ? '#00d4aa' : '#555', fontSize: 22, fontWeight: 800, margin: 0 }}>
+                    {selected.budgetUSDC > 0 ? ['$', selected.budgetUSDC.toFixed(2)].join('') : '—'}
+                    {selected.budgetUSDC > 0 && <span style={{ fontSize: 12, color: '#555', marginLeft: 4 }}>USDC</span>}
+                  </p>
+                </div>
+                <div style={{ padding: '14px 16px', borderRadius: 10, background: '#0a0a14', border: '1px solid #1a1a28' }}>
+                  <p style={{ color: '#555', fontSize: 11, textTransform: 'uppercase', margin: '0 0 4px' }}>Expires</p>
+                  <p style={{ color: '#e8e8f0', fontSize: 15, fontWeight: 700, margin: 0 }}>{selected.expiry || '—'}</p>
+                </div>
+              </div>
+
+              {[
+                { label: 'Client',   value: selected.client,   link: true  },
+                { label: 'Provider', value: selected.provider, link: true  },
+                { label: 'Evaluator',value: selected.evaluator,link: false },
+              ].filter(r => r.value && r.value !== '0x').map(({ label, value, link }) => (
+                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #14141f' }}>
+                  <span style={{ color: '#444', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
+                  {link ? (
+                    <a href={'/owner/' + value} style={{ color: '#5b8af7', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', textDecoration: 'none' }} onClick={e => e.stopPropagation()}>
+                      {value.slice(0,8)}...{value.slice(-6)}
+                    </a>
+                  ) : (
+                    <span style={{ color: '#888', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }}>{value.slice(0,8)}...{value.slice(-6)}</span>
+                  )}
+                </div>
+              ))}
+
+              <div style={{ marginTop: 20, display: 'flex', gap: 10 }}>
+                <a href={'https://testnet.arcscan.app/tx/' + selected.txHash} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                  style={{ flex: 1, display: 'flex', justifyContent: 'center', padding: '10px', borderRadius: 10, background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', color: '#000', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>
+                  View on ArcScan ↗
+                </a>
+                <button onClick={() => setSelected(null)} style={{ padding: '10px 20px', borderRadius: 10, background: 'transparent', border: '1px solid #2a2a3a', color: '#555', fontSize: 13, cursor: 'pointer' }}>
+                  Close
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+                <div style={{ marginTop: 48, textAlign: 'center', color: '#2a2a3a', fontSize: 12 }}>
           ERC-8183 AgenticCommerce · Arc Testnet · Data refreshes every 30s
         </div>
       </main>
