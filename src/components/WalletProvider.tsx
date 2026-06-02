@@ -21,13 +21,13 @@ async function switchToArc() {
   const eth = (window as any).ethereum
   if (!eth) return
   try {
-    await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE252' }] })
+    await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CEF52' }] })
   } catch (e: unknown) {
     if ((e as { code?: number }).code === 4902) {
       await eth.request({
         method: 'wallet_addEthereumChain',
         params: [{
-          chainId: '0x4CE252',
+          chainId: '0x4CEF52',
           chainName: 'Arc Testnet',
           nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 },
           rpcUrls: ['https://rpc.testnet.arc.network'],

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import { createWalletClient, createPublicClient, custom, http, parseAbi } from 'viem'
@@ -44,11 +44,10 @@ const labelStyle = {
 }
 
 export default function CreateJobPage() {
-  const { account: walletAccount, connect: walletConnect } = useWallet()
+  const { account, connect } = useWallet()
   const { success, error: toastError, info } = useToast()
-  void walletAccount; void walletConnect; void toastError; void info; void success
-  const [step, setStep]       = useState<Step>('idle')
-  const [account, setAccount] = useState('')
+  void toastError; void info; void success
+  const [step, setStep] = useState<Step>('idle')
   const [provider, setProvider] = useState('')
   const [description, setDescription] = useState('')
   const [budget, setBudget]   = useState('')
@@ -57,25 +56,13 @@ export default function CreateJobPage() {
   const [txHash, setTxHash]   = useState('')
   const [error, setError]     = useState('')
 
+  useEffect(() => {
+    if (account && (step === 'idle' || step === 'connecting')) setStep('form')
+  }, [account, step])
+
   async function connectWallet() {
     setStep('connecting'); setError('')
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const eth = (window as any).ethereum
-      if (!eth) throw new Error('MetaMask not found. Please install MetaMask.')
-      const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' })
-      try {
-        await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE252' }] })
-      } catch (e: unknown) {
-        if ((e as { code?: number }).code === 4902) {
-          await eth.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x4CE252', chainName: 'Arc Testnet', nativeCurrency: { name: 'USD Coin', symbol: 'USDC', decimals: 6 }, rpcUrls: ['https://rpc.testnet.arc.network'], blockExplorerUrls: ['https://testnet.arcscan.app'] }] })
-        }
-      }
-      setAccount(accounts[0])
-      setStep('form')
-    } catch (e: unknown) {
-      setError((e as Error).message); setStep('error')
-    }
+    await connect()
   }
 
   async function createJob() {
