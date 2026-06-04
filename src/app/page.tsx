@@ -61,8 +61,8 @@ function MiniChart({ data }: { data: ChartBar[] }) {
   if (!data.length) return null
   const max = Math.max(...data.map(d => d.count))
   return (
-    <div style={{ background: 'linear-gradient(145deg,#111118,#0e0e16)', border: '1px solid #1a1a28', borderRadius: 14, padding: '20px 20px 14px', marginBottom: 24 }}>
-      <p style={{ color: '#3a3a52', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>
+    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: '20px 20px 14px', marginBottom: 24, boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
+      <p style={{ color: '#9ca3af', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 16px' }}>
         Registrations · last ~50k blocks
       </p>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 60 }}>
@@ -122,8 +122,8 @@ function RecentTicker({ agents }: { agents: Agent[] }) {
   if (!agents.length) return null
   const recent = agents.slice(0, 5)
   return (
-    <div style={{ background: 'rgba(0,212,170,0.03)', border: '1px solid rgba(0,212,170,0.08)', borderRadius: 10, padding: '10px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden', flexWrap: 'wrap' }}>
-      <span style={{ color: '#00d4aa', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', flexShrink: 0 }}>Live</span>
+    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden', flexWrap: 'wrap', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+      <span style={{ color: '#059669', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', flexShrink: 0 }}>Live</span>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 1 }}>
         {recent.map((a, i) => (
           <Link key={a.id} href={`/agent/${a.id}`} style={{ textDecoration: 'none' }}>
@@ -275,27 +275,26 @@ export default function Home() {
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
   return (
-    <main style={{ minHeight: '100vh', background: '#08080f' }}>
-      {/* Header */}
+    <main style={{ minHeight: '100vh', background: '#f5f6fa' }}>
       <NavHeader right={<LiveBlock block={latestBlock} />} />
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
         {/* Hero */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <h1 style={{ fontSize: 'clamp(28px,5vw,44px)', fontWeight: 800, color: '#fff', margin: '0 0 12px', lineHeight: 1.15 }}>
-            Explore <span style={{ background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI Agents</span> on Arc
+          <h1 style={{ fontSize: 'clamp(28px,5vw,44px)', fontWeight: 900, color: '#111827', margin: '0 0 12px', lineHeight: 1.15, letterSpacing: '-0.03em' }}>
+            Explore <span style={{ background: 'linear-gradient(135deg,#5b8af7,#00d4aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI Agents</span> on Arc
           </h1>
-          <p style={{ color: '#4a4a62', fontSize: 15, maxWidth: 520, margin: '0 auto 20px', lineHeight: 1.7 }}>
+          <p style={{ color: '#6b7280', fontSize: 15, maxWidth: 520, margin: '0 auto 20px', lineHeight: 1.7 }}>
             Browse all registered agents on the Arc Testnet ERC-8004 IdentityRegistry.
             View reputation scores, metadata, and on-chain activity.
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer"
-              style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', color: '#fff', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+              style={{ padding: '10px 22px', borderRadius: 10, background: '#5b8af7', color: '#fff', fontWeight: 700, fontSize: 14, textDecoration: 'none', boxShadow: '0 4px 12px rgba(91,138,247,.3)' }}>
               💧 Get Test USDC
             </a>
             <a href="https://docs.arc.io/arc/tutorials/register-your-first-ai-agent" target="_blank" rel="noopener noreferrer"
-              style={{ padding: '10px 20px', borderRadius: 10, background: '#111118', border: '1px solid #1a1a28', color: '#6b6a7e', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+              style={{ padding: '10px 22px', borderRadius: 10, background: '#fff', border: '1px solid #e5e7eb', color: '#374151', fontWeight: 600, fontSize: 14, textDecoration: 'none', boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
               Register Your Agent ↗
             </a>
           </div>
@@ -308,22 +307,25 @@ export default function Home() {
               label: 'Total Agents',
               value: <AnimatedCounter target={totalAgents || total} loading={loading} />,
               sub: totalAgents > 0 ? 'registered on testnet' : 'recent window',
+              color: '#5b8af7',
             },
             {
               label: 'Reputed Agents',
               value: loading ? '…' : counts.reputed > 0 ? counts.reputed.toLocaleString() : '—',
               sub: counts.reputed > 0 && total > 0 ? `${Math.round((counts.reputed / total) * 100)}% of window` : 'with on-chain feedback',
+              color: '#059669',
             },
             {
               label: 'Latest Block',
               value: latestBlock && latestBlock !== '0' ? `#${Number(latestBlock).toLocaleString()}` : '…',
               sub: 'Arc Testnet · ~2s blocks',
+              color: '#111827',
             },
           ].map(s => (
-            <div key={s.label} className="card" style={{ padding: 16 }}>
-              <p style={{ color: '#3a3a52', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>{s.label}</p>
-              <p style={{ background: 'linear-gradient(135deg,#00d4aa,#5b8af7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: 20, fontWeight: 700, margin: 0 }}>{s.value}</p>
-              {s.sub && <p style={{ color: '#2a2a3a', fontSize: 10, margin: '3px 0 0' }}>{s.sub}</p>}
+            <div key={s.label} className="card" style={{ padding: 18 }}>
+              <p style={{ color: '#9ca3af', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 6px' }}>{s.label}</p>
+              <p style={{ color: s.color, fontSize: 20, fontWeight: 800, margin: 0 }}>{s.value}</p>
+              {s.sub && <p style={{ color: '#9ca3af', fontSize: 10, margin: '3px 0 0' }}>{s.sub}</p>}
             </div>
           ))}
         </div>
@@ -343,11 +345,9 @@ export default function Home() {
               placeholder="Search by Agent ID or owner address…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ width: '100%', padding: '10px 40px 10px 16px', borderRadius: 10, background: '#0e0e16', border: '1px solid #1a1a28', color: '#c9c7d4', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', outline: 'none', boxSizing: 'border-box' }}
-              onFocus={e => (e.target.style.borderColor = '#2a2a45')}
-              onBlur={e => (e.target.style.borderColor = '#1a1a28')}
+              style={{ width: '100%', padding: '10px 40px 10px 16px', borderRadius: 10, background: '#fff', border: '1px solid #e5e7eb', color: '#111827', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', outline: 'none', boxSizing: 'border-box', boxShadow: '0 1px 3px rgba(0,0,0,.05)' }}
             />
-            <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#2a2a3a', fontSize: 11, fontFamily: 'JetBrains Mono, monospace', pointerEvents: 'none' }}>/</span>
+            <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#d1d5db', fontSize: 11, fontFamily: 'JetBrains Mono, monospace', pointerEvents: 'none' }}>/</span>
           </div>
         </div>
 
@@ -362,15 +362,16 @@ export default function Home() {
             ]).map(f => (
               <button key={f.key} onClick={() => { setFilter(f.key); setPage(0) }}
                 style={{
-                  padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none',
-                  background: filter === f.key ? 'linear-gradient(135deg,#00d4aa,#5b8af7)' : '#111118',
-                  color: filter === f.key ? '#fff' : '#3a3a52',
-                  outline: filter !== f.key ? '1px solid #1a1a28' : 'none',
+                  padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                  background: filter === f.key ? '#5b8af7' : '#fff',
+                  color: filter === f.key ? '#fff' : '#6b7280',
+                  border: filter === f.key ? '1px solid #5b8af7' : '1px solid #e5e7eb',
+                  boxShadow: filter === f.key ? '0 2px 8px rgba(91,138,247,.25)' : 'none',
                   transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 6,
                 }}>
                 {f.label}
                 {!loading && f.count > 0 && (
-                  <span style={{ fontSize: 10, opacity: 0.7, background: filter === f.key ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', padding: '1px 5px', borderRadius: 4 }}>
+                  <span style={{ fontSize: 10, background: filter === f.key ? 'rgba(255,255,255,.25)' : '#f3f4f6', padding: '1px 5px', borderRadius: 4 }}>
                     {f.count}
                   </span>
                 )}
@@ -378,7 +379,7 @@ export default function Home() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <span style={{ color: '#2a2a3a', fontSize: 11 }}>Sort:</span>
+            <span style={{ color: '#9ca3af', fontSize: 11, fontWeight: 600 }}>Sort:</span>
             {([
               { key: 'newest' as Sort, label: '↓ Newest' },
               { key: 'oldest' as Sort, label: '↑ Oldest' },
@@ -386,10 +387,10 @@ export default function Home() {
             ]).map(s => (
               <button key={s.key} onClick={() => { setSort(s.key); setPage(0) }}
                 style={{
-                  padding: '7px 11px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer', border: 'none',
-                  background: sort === s.key ? 'rgba(0,212,170,0.12)' : '#111118',
-                  color: sort === s.key ? '#00d4aa' : '#3a3a52',
-                  outline: sort !== s.key ? '1px solid #1a1a28' : '1px solid rgba(0,212,170,0.25)',
+                  padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'inherit',
+                  background: sort === s.key ? '#dbeafe' : '#fff',
+                  color: sort === s.key ? '#1d4ed8' : '#6b7280',
+                  outline: sort === s.key ? '1px solid #93c5fd' : '1px solid #e5e7eb',
                   transition: 'all 0.15s',
                 }}>
                 {s.label}
@@ -400,9 +401,9 @@ export default function Home() {
 
         {/* Error */}
         {error && (
-          <div className="card" style={{ padding: 24, textAlign: 'center', marginBottom: 16, borderColor: '#2a1a1a' }}>
-            <p style={{ color: '#f77a7a', margin: '0 0 12px' }}>{error}</p>
-            <button onClick={load} className="btn btn-ghost">Try again</button>
+          <div style={{ padding: 24, textAlign: 'center', marginBottom: 16, background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 14 }}>
+            <p style={{ color: '#dc2626', margin: '0 0 12px', fontSize: 14 }}>{error}</p>
+            <button onClick={load} style={{ padding: '7px 16px', borderRadius: 8, background: '#fff', border: '1px solid #e5e7eb', color: '#374151', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>Try again</button>
           </div>
         )}
 
@@ -412,8 +413,8 @@ export default function Home() {
             {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="card" style={{ padding: 56, textAlign: 'center' }}>
-            <p style={{ color: '#3a3a52', fontSize: 15, margin: 0 }}>
+          <div style={{ padding: 56, textAlign: 'center', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, boxShadow: '0 1px 3px rgba(0,0,0,.05)' }}>
+            <p style={{ color: '#6b7280', fontSize: 15, margin: 0 }}>
               {search ? 'No agents match your search.' : filter !== 'all' ? 'No agents match this filter in the current window.' : 'No agents found.'}
             </p>
           </div>
@@ -427,18 +428,18 @@ export default function Home() {
         {!search && totalPages > 1 && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 40 }}>
             <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-              className="btn btn-ghost" style={{ opacity: page === 0 ? 0.3 : 1 }}>← Previous</button>
-            <span style={{ color: '#3a3a52', fontSize: 13 }}>Page {page + 1} of {totalPages}</span>
+              style={{ padding: '8px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: page === 0 ? 'not-allowed' : 'pointer', background: '#fff', border: '1px solid #e5e7eb', color: page === 0 ? '#d1d5db' : '#374151' }}>← Previous</button>
+            <span style={{ color: '#6b7280', fontSize: 13 }}>Page {page + 1} of {totalPages}</span>
             <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-              className="btn btn-ghost" style={{ opacity: page >= totalPages - 1 ? 0.3 : 1 }}>Next →</button>
+              style={{ padding: '8px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer', background: '#fff', border: '1px solid #e5e7eb', color: page >= totalPages - 1 ? '#d1d5db' : '#374151' }}>Next →</button>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <footer style={{ borderTop: '1px solid #13131f', marginTop: 64 }}>
+      <footer style={{ borderTop: '1px solid #e5e7eb', marginTop: 64, background: '#fff' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <p style={{ color: '#2a2a3a', fontSize: 13, margin: 0 }}>Built on Arc Testnet · ERC-8004 · Open source</p>
+          <p style={{ color: '#9ca3af', fontSize: 13, margin: 0 }}>Built on Arc Testnet · ERC-8004 · Open source</p>
           <div style={{ display: 'flex', gap: 20 }}>
             {[
               ['GitHub', 'https://github.com/johnlennonferreira/arc-builder'],
@@ -447,9 +448,9 @@ export default function Home() {
               ['Docs', 'https://docs.arc.io'],
             ].map(([l, h]) => (
               <a key={l} href={h} target="_blank" rel="noopener noreferrer"
-                style={{ color: '#3a3a52', fontSize: 13, textDecoration: 'none', transition: 'color 0.15s' }}
-                onMouseOver={e => (e.currentTarget.style.color = '#00d4aa')}
-                onMouseOut={e => (e.currentTarget.style.color = '#3a3a52')}>
+                style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none', transition: 'color 0.15s', fontWeight: 500 }}
+                onMouseOver={e => (e.currentTarget.style.color = '#5b8af7')}
+                onMouseOut={e => (e.currentTarget.style.color = '#6b7280')}>
                 {l}
               </a>
             ))}

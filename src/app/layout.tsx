@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={inter.className} style={{ backgroundColor: '#08080f' }}>
+      <body className={inter.className} style={{ backgroundColor: '#f5f6fa' }}>
         <AppProviders>{children}<AgentBot /></AppProviders>
       </body>
     </html>
