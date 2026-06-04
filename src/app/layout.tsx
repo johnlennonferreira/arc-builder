@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import AgentBot from '@/components/AgentBot'
 import AppProviders from '@/components/AppProviders'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -34,6 +36,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={inter.className} style={{ backgroundColor: '#f5f6fa' }}>
         <AppProviders>{children}<AgentBot /></AppProviders>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
