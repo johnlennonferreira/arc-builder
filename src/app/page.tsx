@@ -347,7 +347,15 @@ export default function Home() {
               onChange={e => setSearch(e.target.value)}
               style={{ width: '100%', padding: '10px 40px 10px 16px', borderRadius: 10, background: '#fff', border: '1px solid #e5e7eb', color: '#111827', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', outline: 'none', boxSizing: 'border-box', boxShadow: '0 1px 3px rgba(0,0,0,.05)' }}
             />
-            <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#d1d5db', fontSize: 11, fontFamily: 'JetBrains Mono, monospace', pointerEvents: 'none' }}>/</span>
+            {search ? (
+              <button
+                onClick={() => { setSearch(''); searchRef.current?.focus() }}
+                style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: '#f3f4f6', border: 'none', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', fontSize: 12, lineHeight: 1, padding: 0 }}
+                title="Clear search"
+              >✕</button>
+            ) : (
+              <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#d1d5db', fontSize: 11, fontFamily: 'JetBrains Mono, monospace', pointerEvents: 'none' }}>/</span>
+            )}
           </div>
         </div>
 
